@@ -1,12 +1,15 @@
 import PokemonItem from "./PokemonItem";
 
-function PokemonList({ pokemons }) {
+function PokemonList({ pokemons, loadMoreButton }) {
   return (
-    <ul>
-      {pokemons.map((pokemon) => (
-        <PokemonItem key={pokemon.url} pokemon={pokemon} />
-      ))}
-    </ul>
+    <div>
+      <ul>
+        {pokemons.map((pokemon) => (
+          <PokemonItem key={pokemon.url} pokemon={pokemon} />
+        ))}
+      </ul>
+      {loadMoreButton}
+    </div>
   );
 }
 

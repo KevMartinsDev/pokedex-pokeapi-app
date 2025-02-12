@@ -30,7 +30,7 @@ const usePokemon = () => {
                 setError(err.message);
                 setIsLoading(false);
             });
-        
+
     }, []);
 
     useEffect(() => {

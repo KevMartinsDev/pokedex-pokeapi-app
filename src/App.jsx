@@ -1,6 +1,7 @@
 import usePokemon from './hooks/usePokemon';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import LoadMoreButton from "./components/LoadMoreButton";
 import PokemonList from './components/PokemonList';
 
 function App() {
@@ -11,11 +12,12 @@ function App() {
       <Header />
 
       <main>
+        {isLoading && <p>Carregando Pokémons...</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <PokemonList pokemons={pokemons} />
-        <button onClick={loadMorePokemons} disabled={isLoading}>
-          {isLoading ? "Carregando..." : "Carregar mais"}
-        </button>
+        <LoadMoreButton onClick={loadMorePokemons} isLoading={isLoading}>
+          Carregar mais
+        </LoadMoreButton>
       </main>
 
       <Footer />
