@@ -1,7 +1,7 @@
 function Footer() {
     return (
       <footer>
-        <p>2025 PokéDev</p>
+        <p>2025 Kevin Martins</p>
       </footer>
     );
   }

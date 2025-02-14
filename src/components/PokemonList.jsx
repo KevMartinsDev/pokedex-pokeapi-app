@@ -1,13 +1,25 @@
-import PokemonItem from "./PokemonItem";
+import PokemonCard from "./PokemonCard";
+import styled from 'styled-components';
+
+const Ulstyle = styled.ul`
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 colunas */
+  gap: 10px; /* Espaçamento entre os cards */
+  justify-content: center;
+  padding: 0;
+  margin: 0 auto;
+  list-style: none;
+`;
+
 
 function PokemonList({ pokemons, loadMoreButton }) {
   return (
     <div>
-      <ul>
+      <Ulstyle>
         {pokemons.map((pokemon) => (
-          <PokemonItem key={pokemon.url} pokemon={pokemon} />
+          <PokemonCard key={pokemon.name} pokemon={pokemon} />
         ))}
-      </ul>
+      </Ulstyle>
       {loadMoreButton}
     </div>
   );
