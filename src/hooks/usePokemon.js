@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 async function pokemonList(limit, offset) {
   const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
@@ -7,15 +7,10 @@ async function pokemonList(limit, offset) {
   }
   const data = await response.json();
 
-  // Acrescentando a imagem e o ID dos Pokémons
   const pokemonsWithImage = data.results.map((pokemon) => {
-    const pokemonId = pokemon.url.split('/').filter(Boolean).pop(); // Obtendo o ID
-    const pokemonImage = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`; // Link da imagem
-    return {
-      ...pokemon,
-      id: pokemonId,
-      image: pokemonImage,
-    };
+    const pokemonId = pokemon.url.split('/').filter(Boolean).pop();
+    const pokemonImage = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`;
+    return { ...pokemon, id: pokemonId, image: pokemonImage };
   });
 
   return pokemonsWithImage;
@@ -26,6 +21,7 @@ const usePokemon = () => {
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [filteredPokemon, setFilteredPokemon] = useState(null);
   const hasFetchedInitial = useRef(false);
 
   useEffect(() => {
@@ -65,7 +61,43 @@ const usePokemon = () => {
     setOffset((prevOffset) => prevOffset + 10);
   }, [isLoading]);
 
-  return { pokemons, loadMorePokemons, isLoading, error };
-}
+  const searchPokemon = async (query) => {
+    if (!query) {
+      setFilteredPokemon(null); 
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${query.toLowerCase()}`);
+      if (!response.ok) throw new Error("Pokémon não encontrado!");
+
+      const data = await response.json();
+      const pokemonImage = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`;
+
+      setFilteredPokemon({ 
+        name: data.name, 
+        id: data.id, 
+        image: pokemonImage 
+      });
+    } catch (error) {
+      setError("Pokémon não encontrado!");
+      setFilteredPokemon(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { 
+    pokemons, 
+    loadMorePokemons, 
+    isLoading, 
+    error, 
+    filteredPokemon, 
+    searchPokemon    
+  };
+};
 
 export default usePokemon;
