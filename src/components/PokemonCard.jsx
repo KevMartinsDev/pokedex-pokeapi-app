@@ -1,14 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-
-const CardContainer = styled.ul`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-`;
 
 const Card = styled.li`
   display: inline-block;
@@ -24,6 +15,7 @@ const ContainerType = styled.div`
   display: flex;
   gap: 5px;
   justify-content: center;
+  flex-wrap: wrap;
 `;
 
 const Number = styled.p`
@@ -48,30 +40,47 @@ const Type = styled.span`
   border-radius: 5px;
   background-color: #f2f2f2;
   color: #333;
+  font-size: 12px;
 `;
 
 function PokemonCard({ pokemon }) {
+  const [imageSrc, setImageSrc] = useState(pokemon.image);
+  const fallbackImages = [
+    pokemon.sprites?.front_default,
+    pokemon.sprites?.back_default,
+    pokemon.sprites?.front_shiny,
+    pokemon.sprites?.back_shiny,
+    'https://via.placeholder.com/120?text=No+Image',
+  ];
+
+  const handleImageError = () => {
+    const nextImage = fallbackImages.shift();
+    if (nextImage) {
+      setImageSrc(nextImage);
+    }
+  };
+
   return (
-    <CardContainer>
-
-      <Card>
-        <div>
-          <Number>#{pokemon.id}</Number>
-        </div>
-        <div>
-          <Image src={pokemon.image} alt={pokemon.name} />
-        </div>
-        <ContainerType>
-          <div>
-            <Name>{pokemon.name}</Name>
-          </div>
-          <Type>type</Type>
-        </ContainerType>
-      </Card>
-
-
-
-    </CardContainer>
+    <Card>
+      <div>
+        <Number>#{pokemon.id}</Number>
+      </div>
+      <div>
+        <Image
+          src={imageSrc}
+          alt={pokemon.name}
+          onError={handleImageError}
+        />
+      </div>
+      <div>
+        <Name>{pokemon.name}</Name>
+      </div>
+      <ContainerType>
+        {pokemon.types && pokemon.types.map((type) => (
+          <Type key={type}>{type}</Type>
+        ))}
+      </ContainerType>
+    </Card>
   );
 }
 
