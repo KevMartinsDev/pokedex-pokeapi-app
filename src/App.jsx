@@ -3,26 +3,29 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import LoadMoreButton from "./components/LoadMoreButton";
 import PokemonList from './components/PokemonList';
-import SearchField from './components/SearchField';
+import SortSelect from './components/SortSelect';
+import SearchField from './components/SearchField'; 
 
 function App() {
-  const { pokemons, loadMorePokemons, isLoading, error, filteredPokemon, searchPokemon } = usePokemon();
+  const { displayedPokemons, loadMorePokemons, isLoading, error, sortOrder, sortPokemons, searchPokemon } = usePokemon();
 
   return (
     <div>
       <Header />
-      
-      <SearchField onSearch={searchPokemon} />
+
+      <SearchField onSearch={searchPokemon} /> 
 
       <main>
         {isLoading && <p>Carregando Pokémons...</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
-        <PokemonList pokemons={filteredPokemon ? [filteredPokemon] : pokemons} />
+        <SortSelect sortOrder={sortOrder} onSort={sortPokemons} />
 
-        {!filteredPokemon && <LoadMoreButton onClick={loadMorePokemons} isLoading={isLoading}>
+        <PokemonList pokemons={displayedPokemons} />
+
+        <LoadMoreButton onClick={loadMorePokemons} isLoading={isLoading}>
           Carregar mais
-        </LoadMoreButton>}
+        </LoadMoreButton>
       </main>
 
       <Footer />

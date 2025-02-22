@@ -1,37 +1,36 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 
-async function pokemonList(limit, offset) {
-  const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
-  if (!response.ok) {
-    throw new Error("Erro ao carregar os Pokémons");
-  }
+async function fetchAllPokemons() {
+  const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1302&offset=0");
+  if (!response.ok) throw new Error("Erro ao carregar os Pokémons");
+
   const data = await response.json();
 
-  const pokemonsWithImage = data.results.map((pokemon) => {
+  return data.results.map((pokemon) => {
     const pokemonId = pokemon.url.split('/').filter(Boolean).pop();
-    const pokemonImage = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`;
-    return { ...pokemon, id: pokemonId, image: pokemonImage };
+    return {
+      ...pokemon,
+      id: parseInt(pokemonId),
+      image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`
+    };
   });
-
-  return pokemonsWithImage;
 }
 
 const usePokemon = () => {
-  const [pokemons, setPokemons] = useState([]);
-  const [offset, setOffset] = useState(0);
+  const [allPokemons, setAllPokemons] = useState([]); 
+  const [displayedPokemons, setDisplayedPokemons] = useState([]); 
+  const [filteredPokemons, setFilteredPokemons] = useState([]); 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [filteredPokemon, setFilteredPokemon] = useState(null);
-  const hasFetchedInitial = useRef(false);
+  const [sortOrder, setSortOrder] = useState("id-asc");
+  const [page, setPage] = useState(1); 
 
   useEffect(() => {
-    if (hasFetchedInitial.current) return;
-    hasFetchedInitial.current = true;
-
     setIsLoading(true);
-    pokemonList(10, 0)
+    fetchAllPokemons()
       .then((data) => {
-        setPokemons(data);
+        setAllPokemons(data);
+        setDisplayedPokemons(data.slice(0, 10)); 
         setIsLoading(false);
       })
       .catch((err) => {
@@ -40,63 +39,54 @@ const usePokemon = () => {
       });
   }, []);
 
-  useEffect(() => {
-    if (offset === 0) return;
+  const sortPokemons = (order) => {
+    if (!allPokemons.length) return;
 
-    setIsLoading(true);
-    pokemonList(10, offset)
-      .then((data) => {
-        setPokemons((prevPokemons) => [...prevPokemons, ...data]);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setIsLoading(false);
-      });
-  }, [offset]);
+    const sorted = [...allPokemons];
+    if (order === "id-asc") {
+      sorted.sort((a, b) => a.id - b.id);
+    } else if (order === "id-desc") {
+      sorted.sort((a, b) => b.id - a.id);
+    } else if (order === "name-asc") {
+      sorted.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (order === "name-desc") {
+      sorted.sort((a, b) => b.name.localeCompare(a.name));
+    }
 
-  const loadMorePokemons = useCallback(() => {
-    if (isLoading) return;
-    setIsLoading(true);
-    setOffset((prevOffset) => prevOffset + 10);
-  }, [isLoading]);
+    setAllPokemons(sorted);
+    setDisplayedPokemons(sorted.slice(0, page * 10)); 
+    setSortOrder(order);
+  };
 
-  const searchPokemon = async (query) => {
+  const loadMorePokemons = () => {
+    const nextPage = page + 1;
+    setDisplayedPokemons(allPokemons.slice(0, nextPage * 10)); 
+    setPage(nextPage);
+  };
+
+  const searchPokemon = (query) => {
     if (!query) {
-      setFilteredPokemon(null); 
+      setFilteredPokemons([]); 
+      setDisplayedPokemons(allPokemons.slice(0, 10)); 
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${query.toLowerCase()}`);
-      if (!response.ok) throw new Error("Pokémon não encontrado!");
-
-      const data = await response.json();
-      const pokemonImage = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`;
-
-      setFilteredPokemon({ 
-        name: data.name, 
-        id: data.id, 
-        image: pokemonImage 
-      });
-    } catch (error) {
-      setError("Pokémon não encontrado!");
-      setFilteredPokemon(null);
-    } finally {
-      setIsLoading(false);
-    }
+    const foundPokemons = allPokemons.filter(pokemon =>
+      pokemon.name.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredPokemons(foundPokemons);
+    setDisplayedPokemons(foundPokemons.slice(0, 10)); 
   };
 
-  return { 
-    pokemons, 
-    loadMorePokemons, 
-    isLoading, 
-    error, 
-    filteredPokemon, 
-    searchPokemon    
+  return {
+    displayedPokemons,
+    loadMorePokemons,
+    isLoading,
+    error,
+    sortOrder,
+    sortPokemons,
+    searchPokemon,
+    filteredPokemons
   };
 };
 
