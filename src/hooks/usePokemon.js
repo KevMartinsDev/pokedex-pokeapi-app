@@ -17,20 +17,20 @@ async function fetchAllPokemons() {
 }
 
 const usePokemon = () => {
-  const [allPokemons, setAllPokemons] = useState([]); 
-  const [displayedPokemons, setDisplayedPokemons] = useState([]); 
-  const [filteredPokemons, setFilteredPokemons] = useState([]); 
+  const [allPokemons, setAllPokemons] = useState([]); // Lista completa
+  const [displayedPokemons, setDisplayedPokemons] = useState([]); // Apenas os visíveis
+  const [filteredPokemons, setFilteredPokemons] = useState([]); // Pokémon filtrado pela busca
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sortOrder, setSortOrder] = useState("id-asc");
-  const [page, setPage] = useState(1); 
+  const [page, setPage] = useState(1); // Controla a página (10 por vez)
 
   useEffect(() => {
     setIsLoading(true);
     fetchAllPokemons()
       .then((data) => {
         setAllPokemons(data);
-        setDisplayedPokemons(data.slice(0, 10)); 
+        setDisplayedPokemons(data.slice(0, 10)); // Mostra os 10 primeiros
         setIsLoading(false);
       })
       .catch((err) => {
@@ -54,20 +54,21 @@ const usePokemon = () => {
     }
 
     setAllPokemons(sorted);
-    setDisplayedPokemons(sorted.slice(0, page * 10)); 
+    setDisplayedPokemons(sorted.slice(0, page * 10)); // Atualiza a lista visível
     setSortOrder(order);
   };
 
   const loadMorePokemons = () => {
     const nextPage = page + 1;
-    setDisplayedPokemons(allPokemons.slice(0, nextPage * 10)); 
+    setDisplayedPokemons(allPokemons.slice(0, nextPage * 10)); // Adiciona mais 10
     setPage(nextPage);
   };
 
+  // Função de busca
   const searchPokemon = (query) => {
     if (!query) {
-      setFilteredPokemons([]); 
-      setDisplayedPokemons(allPokemons.slice(0, 10)); 
+      setFilteredPokemons([]); // Limpa o filtro
+      setDisplayedPokemons(allPokemons.slice(0, 10)); // Restaura a lista de todos os pokémons
       return;
     }
 
@@ -75,7 +76,7 @@ const usePokemon = () => {
       pokemon.name.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredPokemons(foundPokemons);
-    setDisplayedPokemons(foundPokemons.slice(0, 10)); 
+    setDisplayedPokemons(foundPokemons.slice(0, 10)); // Exibe apenas os 10 primeiros resultados
   };
 
   return {

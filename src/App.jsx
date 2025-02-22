@@ -4,7 +4,7 @@ import Footer from './components/Footer';
 import LoadMoreButton from "./components/LoadMoreButton";
 import PokemonList from './components/PokemonList';
 import SortSelect from './components/SortSelect';
-import SearchField from './components/SearchField'; 
+import SearchField from './components/SearchField'; // Campo de busca
 
 function App() {
   const { displayedPokemons, loadMorePokemons, isLoading, error, sortOrder, sortPokemons, searchPokemon } = usePokemon();
@@ -13,7 +13,7 @@ function App() {
     <div>
       <Header />
 
-      <SearchField onSearch={searchPokemon} /> 
+      <SearchField onSearch={searchPokemon} /> {/* Campo de busca */}
 
       <main>
         {isLoading && <p>Carregando Pokémons...</p>}
