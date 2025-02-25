@@ -18,6 +18,7 @@ function App() {
     searchPokemon,
     filterByType,
     typeFilter,
+    loadedCount,
   } = usePokemon();
 
   return (
@@ -27,7 +28,7 @@ function App() {
       <SortSelect sortOrder={sortOrder} onSort={sortPokemons} />
       <TypeFilter onFilter={filterByType} currentFilter={typeFilter} />
       <main>
-        {isLoading && <p>Carregando Pokémons...</p>}
+        {isLoading && <p>Carregando {loadedCount} de 1302 Pokémon...</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <PokemonList pokemons={displayedPokemons} />
         <LoadMoreButton onClick={loadMorePokemons} isLoading={isLoading}>

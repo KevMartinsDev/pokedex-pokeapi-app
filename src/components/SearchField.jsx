@@ -1,34 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
+import debounce from 'lodash/debounce';
 
 const SearchField = ({ onSearch }) => {
-    const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("");
+  
+  const debouncedSearch = useCallback(
+    debounce((value) => onSearch(value), 300),
+    [onSearch]
+  );
 
-    const handleInputChange = (e) => {
-        setQuery(e.target.value);
-    };
+  const handleInputChange = (e) => {
+    setQuery(e.target.value);
+    debouncedSearch(e.target.value);
+  };
 
-    const handleSearch = () => {
-        onSearch(query);
-    };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      onSearch(query);
+    }
+  };
 
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            handleSearch();
-        }
-    };
-
-    return (
-        <div>
-            <input 
-                type="text" 
-                value={query} 
-                onChange={handleInputChange} 
-                onKeyDown={handleKeyDown} 
-                placeholder="Buscar Pokémon por nome ou ID" 
-            />
-            <button onClick={handleSearch}>Buscar</button>
-        </div>
-    );
+  return (
+    <div>
+      <input
+        type="text"
+        value={query}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        placeholder="Buscar Pokémon por nome ou ID"
+      />
+      <button onClick={() => onSearch(query)}>Buscar</button>
+    </div>
+  );
 };
 
 export default SearchField;
