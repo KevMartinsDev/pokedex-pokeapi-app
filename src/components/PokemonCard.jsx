@@ -1,6 +1,7 @@
 // src/components/PokemonCard.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import PokemonModal from './PokemonModal';
 
 const Card = styled.li`
   display: inline-block;
@@ -12,6 +13,7 @@ const Card = styled.li`
   width: 150px;
   background-color: ${({ theme }) => theme.cardBackground};
   color: ${({ theme }) => theme.text};
+  cursor: pointer; // Indica que é clicável
 `;
 
 const ContainerType = styled.div`
@@ -48,6 +50,8 @@ const Type = styled.span`
 
 function PokemonCard({ pokemon }) {
   const [imageSrc, setImageSrc] = useState(pokemon.image);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const fallbackImages = [
     pokemon.sprites?.front_default,
     pokemon.sprites?.back_default,
@@ -63,27 +67,38 @@ function PokemonCard({ pokemon }) {
     }
   };
 
+  const handleCardClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
-    <Card>
-      <div>
-        <Number>#{pokemon.id}</Number>
-      </div>
-      <div>
-        <Image
-          src={imageSrc}
-          alt={pokemon.name}
-          onError={handleImageError}
-        />
-      </div>
-      <div>
-        <Name>{pokemon.name}</Name>
-      </div>
-      <ContainerType>
-        {pokemon.types && pokemon.types.map((type) => (
-          <Type key={type}>{type}</Type>
-        ))}
-      </ContainerType>
-    </Card>
+    <>
+      <Card onClick={handleCardClick}>
+        <div>
+          <Number>#{pokemon.id}</Number>
+        </div>
+        <div>
+          <Image
+            src={imageSrc}
+            alt={pokemon.name}
+            onError={handleImageError}
+          />
+        </div>
+        <div>
+          <Name>{pokemon.name}</Name>
+        </div>
+        <ContainerType>
+          {pokemon.types && pokemon.types.map((type) => (
+            <Type key={type}>{type}</Type>
+          ))}
+        </ContainerType>
+      </Card>
+      {isModalOpen && <PokemonModal pokemon={pokemon} onClose={handleCloseModal} />}
+    </>
   );
 }
 
