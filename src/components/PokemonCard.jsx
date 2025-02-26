@@ -1,3 +1,4 @@
+// src/components/PokemonCard.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
@@ -5,10 +6,12 @@ const Card = styled.li`
   display: inline-block;
   text-align: center;
   margin: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid ${({ theme }) => theme.border};
   border-radius: 8px;
   padding: 10px;
   width: 150px;
+  background-color: ${({ theme }) => theme.cardBackground};
+  color: ${({ theme }) => theme.text};
 `;
 
 const ContainerType = styled.div`
@@ -38,8 +41,8 @@ const Name = styled.p`
 const Type = styled.span`
   padding: 5px;
   border-radius: 5px;
-  background-color: #f2f2f2;
-  color: #333;
+  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
+  color: ${({ theme }) => theme.text};
   font-size: 12px;
 `;
 

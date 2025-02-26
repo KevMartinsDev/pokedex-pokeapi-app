@@ -1,13 +1,21 @@
+// src/tests/__tests__/Components.test.js
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import PokemonCard from '../../components/PokemonCard';
 import PokemonList from '../../components/PokemonList';
 import LoadMoreButton from '../../components/LoadMoreButton';
 import SearchField from '../../components/SearchField';
+import ThemeToggle from '../../components/ThemeToggle';
+import { ThemeProvider } from '../../context/ThemeContext';
 
 jest.mock('lodash/debounce', () => jest.fn((fn) => fn));
+jest.mock('../../assets/img/theme_toggle.png', () => 'mocked-theme-toggle.png');
 
 describe('Components', () => {
+  const renderWithThemeProvider = (ui) => {
+    return render(<ThemeProvider>{ui}</ThemeProvider>);
+  };
+
   describe('PokemonCard', () => {
     const pokemon = {
       id: 1,
@@ -121,6 +129,40 @@ describe('Components', () => {
       const input = screen.getByPlaceholderText('Buscar Pokémon por nome ou ID');
       fireEvent.change(input, { target: { value: 'pika' } });
       expect(onSearch).toHaveBeenCalledWith('pika');
+    });
+  });
+
+  describe('ThemeToggle', () => {
+    test('renderiza o slider corretamente', () => {
+      renderWithThemeProvider(<ThemeToggle />);
+      const slider = screen.getByRole('checkbox');
+      expect(slider).toBeInTheDocument();
+      expect(slider).not.toBeChecked();
+    });
+
+    test('alterna o tema ao clicar no slider', () => {
+      renderWithThemeProvider(<ThemeToggle />);
+      const slider = screen.getByRole('checkbox');
+
+      expect(slider).not.toBeChecked();
+
+      fireEvent.click(slider);
+      expect(slider).toBeChecked();
+
+      fireEvent.click(slider);
+      expect(slider).not.toBeChecked();
+    });
+
+    test('renderiza o slider com a estrutura esperada', () => {
+      const { container } = renderWithThemeProvider(<ThemeToggle />);
+      const slider = screen.getByRole('checkbox');
+      const sliderSpan = slider.nextElementSibling;
+      expect(slider).toBeInTheDocument();
+      expect(sliderSpan).toBeInTheDocument();
+      expect(sliderSpan).toHaveClass('slider');
+
+      const computedStyles = window.getComputedStyle(sliderSpan);
+      expect(computedStyles.backgroundColor).toBe('rgb(35, 35, 35)'); // #232323
     });
   });
 });

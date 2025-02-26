@@ -1,4 +1,4 @@
-import React from 'react'; // Adicionado
+import React from 'react';
 import PokemonCard from "./PokemonCard";
 import styled from 'styled-components';
 
