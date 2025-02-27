@@ -1,6 +1,86 @@
-// src/components/PokemonModal.jsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+
+export const cleanText = (text) => {
+  return text.replace(/[\f\n\r\t\v]/g, ' ');
+};
+
+export async function fetchPokemonDetails(pokemonId) {
+  const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+  if (!response.ok) throw new Error('Error loading Pokémon details');
+  const data = await response.json();
+  return {
+    name: data.name,
+    abilities: data.abilities.map((ability) => ({
+      name: ability.ability.name,
+      url: ability.ability.url,
+    })),
+    moves: data.moves.slice(0, 10).map((move) => ({
+      name: move.move.name,
+      url: move.move.url,
+    })),
+    types: data.types.map((type) => type.type.name),
+    stats: data.stats.map((stat) => ({
+      name: stat.stat.name,
+      value: stat.base_stat,
+    })),
+  };
+}
+
+export async function fetchPokemonDescription(pokemonId) {
+  const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`);
+  if (!response.ok) throw new Error('Error loading Pokémon description');
+  const data = await response.json();
+  const flavorText = data.flavor_text_entries.find((entry) => entry.language.name === 'en');
+  return flavorText ? cleanText(flavorText.flavor_text) : 'No description available.';
+}
+
+export async function fetchAbilityDescription(abilityUrl) {
+  const response = await fetch(abilityUrl);
+  if (!response.ok) throw new Error('Error loading ability description');
+  const data = await response.json();
+  const effectEntry = data.effect_entries.find((entry) => entry.language.name === 'en');
+  return effectEntry ? cleanText(effectEntry.effect) : 'No ability description available.';
+}
+
+export async function fetchMoveDescription(moveUrl) {
+  const response = await fetch(moveUrl);
+  if (!response.ok) throw new Error('Error loading move description');
+  const data = await response.json();
+  const effectEntry = data.effect_entries.find((entry) => entry.language.name === 'en');
+  return effectEntry ? cleanText(effectEntry.effect) : 'No move description available.';
+}
+
+export async function fetchTypeMatchups(types) {
+  const typeData = await Promise.all(
+    types.map(async (type) => {
+      const response = await fetch(`https://pokeapi.co/api/v2/type/${type}`);
+      if (!response.ok) throw new Error('Error loading type data');
+      return await response.json();
+    })
+  );
+
+  const weaknesses = new Set();
+  const resistances = new Set();
+
+  typeData.forEach((type) => {
+    type.damage_relations.double_damage_from.forEach((t) => weaknesses.add(t.name));
+    type.damage_relations.half_damage_from.forEach((t) => resistances.add(t.name));
+    type.damage_relations.no_damage_from.forEach((t) => resistances.add(t.name));
+  });
+
+  resistances.forEach((type) => {
+    if (weaknesses.has(type)) {
+      weaknesses.delete(type);
+      resistances.delete(type);
+    }
+  });
+
+  return {
+    weaknesses: Array.from(weaknesses),
+    resistances: Array.from(resistances),
+  };
+}
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -173,83 +253,6 @@ const DescriptionPanel = styled.div`
   overflow-wrap: break-word;
 `;
 
-async function fetchPokemonDetails(pokemonId) {
-  const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
-  if (!response.ok) throw new Error('Error loading Pokémon details');
-  const data = await response.json();
-  return {
-    name: data.name,
-    abilities: data.abilities.map((ability) => ({
-      name: ability.ability.name,
-      url: ability.ability.url,
-    })),
-    moves: data.moves.slice(0, 10).map((move) => ({
-      name: move.move.name,
-      url: move.move.url,
-    })),
-    types: data.types.map((type) => type.type.name),
-    stats: data.stats.map((stat) => ({
-      name: stat.stat.name,
-      value: stat.base_stat,
-    })),
-  };
-}
-
-async function fetchPokemonDescription(pokemonId) {
-  const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`);
-  if (!response.ok) throw new Error('Error loading Pokémon description');
-  const data = await response.json();
-  const flavorText = data.flavor_text_entries.find((entry) => entry.language.name === 'en');
-  return flavorText ? flavorText.flavor_text : 'No description available.';
-}
-
-async function fetchAbilityDescription(abilityUrl) {
-  const response = await fetch(abilityUrl);
-  if (!response.ok) throw new Error('Error loading ability description');
-  const data = await response.json();
-  const effectEntry = data.effect_entries.find((entry) => entry.language.name === 'en');
-  return effectEntry ? effectEntry.effect : 'No ability description available.';
-}
-
-async function fetchMoveDescription(moveUrl) {
-  const response = await fetch(moveUrl);
-  if (!response.ok) throw new Error('Error loading move description');
-  const data = await response.json();
-  const effectEntry = data.effect_entries.find((entry) => entry.language.name === 'en');
-  return effectEntry ? effectEntry.effect : 'No move description available.';
-}
-
-async function fetchTypeMatchups(types) {
-  const typeData = await Promise.all(
-    types.map(async (type) => {
-      const response = await fetch(`https://pokeapi.co/api/v2/type/${type}`);
-      if (!response.ok) throw new Error('Error loading type data');
-      return await response.json();
-    })
-  );
-
-  const weaknesses = new Set();
-  const resistances = new Set();
-
-  typeData.forEach((type) => {
-    type.damage_relations.double_damage_from.forEach((t) => weaknesses.add(t.name));
-    type.damage_relations.half_damage_from.forEach((t) => resistances.add(t.name));
-    type.damage_relations.no_damage_from.forEach((t) => resistances.add(t.name));
-  });
-
-  resistances.forEach((type) => {
-    if (weaknesses.has(type)) {
-      weaknesses.delete(type);
-      resistances.delete(type);
-    }
-  });
-
-  return {
-    weaknesses: Array.from(weaknesses),
-    resistances: Array.from(resistances),
-  };
-}
-
 function PokemonModal({ pokemon, onClose }) {
   const [details, setDetails] = useState(null);
   const [description, setDescription] = useState('');
@@ -258,16 +261,21 @@ function PokemonModal({ pokemon, onClose }) {
   const [typeMatchups, setTypeMatchups] = useState({ weaknesses: [], resistances: [] });
 
   useEffect(() => {
+    console.log('useEffect disparado com pokemon.id:', pokemon.id);
     const loadDetails = async () => {
       try {
+        console.log('Iniciando fetchPokemonDetails');
         const pokemonDetails = await fetchPokemonDetails(pokemon.id);
+        console.log('fetchPokemonDetails concluído:', pokemonDetails);
         const pokemonDesc = await fetchPokemonDescription(pokemon.id);
+        console.log('fetchPokemonDescription concluído:', pokemonDesc);
         const matchups = await fetchTypeMatchups(pokemonDetails.types);
+        console.log('fetchTypeMatchups concluído:', matchups);
         setDetails(pokemonDetails);
         setDescription(pokemonDesc);
         setTypeMatchups(matchups);
       } catch (error) {
-        console.error(error);
+        console.error('Erro no loadDetails:', error);
         setDescription('Error loading information.');
       }
     };
@@ -310,6 +318,8 @@ function PokemonModal({ pokemon, onClose }) {
     }
   };
 
+  console.log('Renderizando com description:', description);
+
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
@@ -329,41 +339,41 @@ function PokemonModal({ pokemon, onClose }) {
                 </TypeTags>
               </div>
               <StatsPanel>
-              <StatSection>
-                <StatTitle>Base Stats</StatTitle>
                 <StatSection>
-                  {details.stats.map((stat) => (
-                    <StatTag key={stat.name}>{`${stat.name}: ${stat.value}`}</StatTag>
-                  ))}
+                  <StatTitle>Base Stats</StatTitle>
+                  <StatSection>
+                    {details.stats.map((stat) => (
+                      <StatTag key={stat.name}>{`${stat.name}: ${stat.value}`}</StatTag>
+                    ))}
+                  </StatSection>
                 </StatSection>
-              </StatSection>
-            </StatsPanel>
+              </StatsPanel>
               <MatchupPanel>
-                  <MatchupSection>
-                    <MatchupTitle>Weak Against</MatchupTitle>
-                    <TypeList>
-                      {typeMatchups.weaknesses.length > 0 ? (
-                        typeMatchups.weaknesses.map((type) => (
-                          <TypeTag key={type}>{type}</TypeTag>
-                        ))
-                      ) : (
-                        <TypeTag>None</TypeTag>
-                      )}
-                    </TypeList>
-                  </MatchupSection>
-                  <MatchupSection>
-                    <MatchupTitle>Strong Against</MatchupTitle>
-                    <TypeList>
-                      {typeMatchups.resistances.length > 0 ? (
-                        typeMatchups.resistances.map((type) => (
-                          <TypeTag key={type}>{type}</TypeTag>
-                        ))
-                      ) : (
-                        <TypeTag>None</TypeTag>
-                      )}
-                    </TypeList>
-                  </MatchupSection>
-                </MatchupPanel>
+                <MatchupSection>
+                  <MatchupTitle>Weak Against</MatchupTitle>
+                  <TypeList>
+                    {typeMatchups.weaknesses.length > 0 ? (
+                      typeMatchups.weaknesses.map((type) => (
+                        <TypeTag key={type}>{type}</TypeTag>
+                      ))
+                    ) : (
+                      <TypeTag>None</TypeTag>
+                    )}
+                  </TypeList>
+                </MatchupSection>
+                <MatchupSection>
+                  <MatchupTitle>Strong Against</MatchupTitle>
+                  <TypeList>
+                    {typeMatchups.resistances.length > 0 ? (
+                      typeMatchups.resistances.map((type) => (
+                        <TypeTag key={type}>{type}</TypeTag>
+                      ))
+                    ) : (
+                      <TypeTag>None</TypeTag>
+                    )}
+                  </TypeList>
+                </MatchupSection>
+              </MatchupPanel>
             </HeaderSection>
             <ListsSection>
               <AbilitiesPanel>
@@ -399,18 +409,18 @@ function PokemonModal({ pokemon, onClose }) {
                 </List>
               </MovesPanel>
             </ListsSection>
-            <DescriptionPanel>
-              <h3>
-                {selectedAbility
-                  ? `${selectedAbility.name} Description`
-                  : selectedMove
-                  ? `${selectedMove.name} Description`
-                  : 'Pokémon Description'}
-              </h3>
-              <p>{description || 'Loading...'}</p>
-            </DescriptionPanel>
           </>
         )}
+        <DescriptionPanel>
+          <h3>
+            {selectedAbility
+              ? `${selectedAbility.name} Description`
+              : selectedMove
+              ? `${selectedMove.name} Description`
+              : 'Pokémon Description'}
+          </h3>
+          <p>{description || 'Loading...'}</p>
+        </DescriptionPanel>
       </ModalContent>
     </ModalOverlay>
   );

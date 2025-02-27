@@ -1,6 +1,5 @@
-// src/App.jsx
 import React from 'react';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
+import { ThemeProvider as StyledThemeProvider, createGlobalStyle } from 'styled-components';
 import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -13,7 +12,13 @@ import ThemeToggle from './components/ThemeToggle';
 import usePokemon from './hooks/usePokemon';
 import styled from 'styled-components';
 
-// Definição dos temas
+const GlobalStyle = createGlobalStyle`
+  * {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px; /* Ajuste conforme necessário */
+  }
+`;
+
 const lightTheme = {
   background: '#ffffff',
   text: '#333333',
@@ -53,6 +58,7 @@ function AppContent() {
 
   return (
     <StyledThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
+      <GlobalStyle />
       <AppContainer>
         <Header />
         <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>

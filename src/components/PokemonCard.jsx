@@ -1,4 +1,3 @@
-// src/components/PokemonCard.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import PokemonModal from './PokemonModal';

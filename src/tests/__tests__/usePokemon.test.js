@@ -14,7 +14,6 @@ describe('usePokemon Hook and Functions', () => {
     };
     Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-    // Mock para o useEffect
     global.fetch.mockImplementation((url) => {
       if (url.includes('pokemon?limit')) {
         return Promise.resolve({
