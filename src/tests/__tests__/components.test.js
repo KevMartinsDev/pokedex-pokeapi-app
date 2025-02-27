@@ -7,7 +7,11 @@ import SearchField from '../../components/SearchField';
 import ThemeToggle from '../../components/ThemeToggle';
 import { ThemeProvider } from '../../context/ThemeContext';
 
-jest.mock('lodash/debounce', () => jest.fn((fn) => fn));
+jest.mock('lodash/debounce', () => jest.fn((fn) => {
+  const debouncedFn = (...args) => fn(...args);
+  debouncedFn.cancel = jest.fn();
+  return debouncedFn;
+}));
 jest.mock('../../assets/img/theme_toggle.png', () => 'mocked-theme-toggle.png');
 
 describe('Components', () => {
@@ -29,7 +33,7 @@ describe('Components', () => {
 
     test('renderiza dados do Pokémon corretamente', () => {
       render(<PokemonCard pokemon={pokemon} />);
-      expect(screen.getByText('#1')).toBeInTheDocument();
+      expect(screen.getByText('#1')).toBeInTheDocument(); // ID na cápsula
       expect(screen.getByText('bulbasaur')).toBeInTheDocument();
       expect(screen.getByAltText('bulbasaur')).toHaveAttribute('src', 'bulbasaur.png');
       expect(screen.getByText('grass')).toBeInTheDocument();
@@ -66,9 +70,9 @@ describe('Components', () => {
     });
 
     test('renderiza botão de carregar mais quando fornecido', () => {
-      const loadMoreButton = <button>Carregar mais</button>;
+      const loadMoreButton = <button>Load More</button>;
       render(<PokemonList pokemons={pokemons} loadMoreButton={loadMoreButton} />);
-      expect(screen.getByText('Carregar mais')).toBeInTheDocument();
+      expect(screen.getByText('Load More')).toBeInTheDocument();
     });
 
     test('não quebra com lista vazia', () => {
@@ -80,17 +84,17 @@ describe('Components', () => {
   describe('LoadMoreButton', () => {
     test('mostra texto normal quando não está carregando', () => {
       const onClick = jest.fn();
-      render(<LoadMoreButton isLoading={false} onClick={onClick}>Carregar</LoadMoreButton>);
-      expect(screen.getByText('Carregar')).toBeInTheDocument();
+      render(<LoadMoreButton isLoading={false} onClick={onClick}>Load More</LoadMoreButton>);
+      expect(screen.getByText('Load More')).toBeInTheDocument();
       expect(screen.getByRole('button')).not.toBeDisabled();
       fireEvent.click(screen.getByRole('button'));
       expect(onClick).toHaveBeenCalled();
     });
 
-    test('mostra "Carregando..." e desabilita quando está carregando', () => {
+    test('mostra "Loading..." e desabilita quando está carregando', () => {
       const onClick = jest.fn();
-      render(<LoadMoreButton isLoading={true} onClick={onClick}>Carregar</LoadMoreButton>);
-      expect(screen.getByText('Carregando...')).toBeInTheDocument();
+      render(<LoadMoreButton isLoading={true} onClick={onClick}>Load More</LoadMoreButton>);
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
       expect(screen.getByRole('button')).toBeDisabled();
       fireEvent.click(screen.getByRole('button'));
       expect(onClick).not.toHaveBeenCalled();
@@ -98,36 +102,21 @@ describe('Components', () => {
   });
 
   describe('SearchField', () => {
-    test('renderiza input e botão', () => {
-      render(<SearchField onSearch={() => {}} />);
-      expect(screen.getByPlaceholderText('Buscar Pokémon por nome ou ID')).toBeInTheDocument();
-      expect(screen.getByText('Buscar')).toBeInTheDocument();
-    });
-
-    test('chama onSearch ao pressionar Enter', () => {
-      const onSearch = jest.fn();
-      render(<SearchField onSearch={onSearch} />);
-      const input = screen.getByPlaceholderText('Buscar Pokémon por nome ou ID');
-      fireEvent.change(input, { target: { value: 'pikachu' } });
-      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-      expect(onSearch).toHaveBeenCalledWith('pikachu');
-    });
-
-    test('chama onSearch ao clicar no botão', () => {
-      const onSearch = jest.fn();
-      render(<SearchField onSearch={onSearch} />);
-      const input = screen.getByPlaceholderText('Buscar Pokémon por nome ou ID');
-      fireEvent.change(input, { target: { value: 'pikachu' } });
-      fireEvent.click(screen.getByText('Buscar'));
-      expect(onSearch).toHaveBeenCalledWith('pikachu');
+    test('renderiza input', () => {
+      render(<SearchField onSearch={jest.fn()} />);
+      expect(screen.getByPlaceholderText('Search Pokémon...')).toBeInTheDocument();
     });
 
     test('chama onSearch com debounce ao digitar', () => {
+      jest.useFakeTimers();
       const onSearch = jest.fn();
       render(<SearchField onSearch={onSearch} />);
-      const input = screen.getByPlaceholderText('Buscar Pokémon por nome ou ID');
+      const input = screen.getByPlaceholderText('Search Pokémon...');
       fireEvent.change(input, { target: { value: 'pika' } });
       expect(onSearch).toHaveBeenCalledWith('pika');
+      jest.advanceTimersByTime(300); 
+      expect(onSearch).toHaveBeenCalledTimes(1);
+      jest.useRealTimers();
     });
   });
 

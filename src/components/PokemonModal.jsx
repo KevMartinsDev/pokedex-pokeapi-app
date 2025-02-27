@@ -101,8 +101,8 @@ const ModalContent = styled.div`
   padding: 20px;
   border-radius: 10px;
   width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
+  max-width: 1000px;
+  max-height: 85vh;
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -110,6 +110,24 @@ const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
+
+  @media (max-width: 1024px) {
+    max-width: 90%;
+    padding: 15px;
+  }
+
+  @media (max-width: 768px) {
+    max-width: 95%;
+    padding: 10px;
+    max-height: 90vh;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    padding: 10px;
+    border-radius: 0;
+    max-height: 95vh;
+  }
 `;
 
 const CloseButton = styled.button`
@@ -128,6 +146,12 @@ const HeaderSection = styled.div`
   align-items: center;
   flex-wrap: wrap;
   justify-content: space-around;
+  gap: 15px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 const ImageContainer = styled.div`
@@ -139,41 +163,27 @@ const ImageContainer = styled.div`
 const PokemonImage = styled.img`
   width: 150px;
   height: 150px;
+
+  @media (max-width: 480px) {
+    width: 120px;
+    height: 120px;
+  }
 `;
 
 const PokemonName = styled.h2`
   margin: 0;
   font-size: 24px;
   text-transform: capitalize;
+
+  @media (max-width: 480px) {
+    font-size: 20px;
+  }
 `;
 
 const TypeTags = styled.div`
   display: flex;
   gap: 5px;
   margin-top: 5px;
-`;
-
-const MatchupPanel = styled.div`
-  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
-  padding: 10px;
-  border-radius: 5px;
-  width: 100%;
-  max-width: 150px;
-`;
-
-const MatchupSection = styled.div`
-  margin-bottom: 10px;
-`;
-
-const MatchupTitle = styled.h4`
-  margin: 0 0 5px 0;
-  font-size: 14px;
-`;
-
-const TypeList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
 `;
 
 const TypeTag = styled.span`
@@ -183,46 +193,15 @@ const TypeTag = styled.span`
   font-size: 12px;
 `;
 
-const ListsSection = styled.div`
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-`;
-
-const AbilitiesPanel = styled.div`
-  flex: 1;
-  min-width: 200px;
-`;
-
-const MovesPanel = styled.div`
-  flex: 1;
-  min-width: 200px;
-`;
-
-const List = styled.ul`
-  list-style: none;
-  padding: 0;
-  max-height: 150px;
-  overflow-y: auto;
-  margin: 0;
-`;
-
-const ListItem = styled.li`
-  padding: 8px;
-  margin: 5px 0;
-  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
-  border-radius: 5px;
-  cursor: pointer;
-  &:hover {
-    background-color: ${({ theme }) => theme.border};
-  }
-`;
-
 const StatsPanel = styled.div`
   background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
   padding: 10px;
   border-radius: 5px;
   width: 150px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const StatSection = styled.div`
@@ -244,6 +223,85 @@ const StatTag = styled.span`
   font-size: 12px;
 `;
 
+const MatchupPanel = styled.div`
+  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
+  padding: 10px;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 150px;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
+`;
+
+const MatchupSection = styled.div`
+  margin-bottom: 10px;
+`;
+
+const MatchupTitle = styled.h4`
+  margin: 0 0 5px 0;
+  font-size: 14px;
+`;
+
+const TypeList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+`;
+
+const ListsSection = styled.div`
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+  }
+`;
+
+const AbilitiesPanel = styled.div`
+  flex: 1;
+  min-width: 200px;
+
+  @media (max-width: 480px) {
+    min-width: 100%;
+  }
+`;
+
+const MovesPanel = styled.div`
+  flex: 1;
+  min-width: 200px;
+
+  @media (max-width: 480px) {
+    min-width: 100%;
+  }
+`;
+
+const List = styled.ul`
+  list-style: none;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  margin: 0;
+
+  @media (max-width: 480px) {
+    max-height: 120px;
+  }
+`;
+
+const ListItem = styled.li`
+  padding: 8px;
+  margin: 5px 0;
+  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: ${({ theme }) => theme.border};
+  }
+`;
+
 const DescriptionPanel = styled.div`
   background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
   padding: 15px;
@@ -261,16 +319,11 @@ function PokemonModal({ pokemon, onClose }) {
   const [typeMatchups, setTypeMatchups] = useState({ weaknesses: [], resistances: [] });
 
   useEffect(() => {
-    console.log('useEffect disparado com pokemon.id:', pokemon.id);
     const loadDetails = async () => {
       try {
-        console.log('Iniciando fetchPokemonDetails');
         const pokemonDetails = await fetchPokemonDetails(pokemon.id);
-        console.log('fetchPokemonDetails concluído:', pokemonDetails);
         const pokemonDesc = await fetchPokemonDescription(pokemon.id);
-        console.log('fetchPokemonDescription concluído:', pokemonDesc);
         const matchups = await fetchTypeMatchups(pokemonDetails.types);
-        console.log('fetchTypeMatchups concluído:', matchups);
         setDetails(pokemonDetails);
         setDescription(pokemonDesc);
         setTypeMatchups(matchups);
@@ -317,8 +370,6 @@ function PokemonModal({ pokemon, onClose }) {
       }
     }
   };
-
-  console.log('Renderizando com description:', description);
 
   return (
     <ModalOverlay onClick={onClose}>
