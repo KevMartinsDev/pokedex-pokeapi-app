@@ -19,9 +19,9 @@ describe('App', () => {
   test('renderiza os componentes principais', () => {
     render(<App />);
     expect(screen.getByAltText('logo')).toBeInTheDocument();
-    expect(screen.getByText('#1')).toBeInTheDocument(); 
-    expect(screen.getByText('2025 Kevin Martins')).toBeInTheDocument(); 
-    expect(screen.getByRole('button', { name: 'Load More' })).toBeInTheDocument(); 
+    expect(screen.getByText('#1')).toBeInTheDocument();
+    expect(screen.getByText('2025 Kevin Martins')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Load More' })).toBeInTheDocument();
   });
 
   test('alterna o tema', () => {
@@ -29,7 +29,7 @@ describe('App', () => {
     const toggle = screen.getByRole('checkbox');
     expect(toggle).not.toBeChecked();
     fireEvent.click(toggle);
-    expect(toggle).toBeChecked(); 
+    expect(toggle).toBeChecked();
     fireEvent.click(toggle);
     expect(toggle).not.toBeChecked();
   });

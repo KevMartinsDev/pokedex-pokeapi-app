@@ -88,3 +88,4 @@ describe('PokemonModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
+

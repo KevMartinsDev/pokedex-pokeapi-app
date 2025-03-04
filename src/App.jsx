@@ -1,4 +1,5 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
+import { HashRouter as Router, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { ThemeProvider as StyledThemeProvider, createGlobalStyle, keyframes } from 'styled-components';
 import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
 import Header from './components/Header';
@@ -9,6 +10,7 @@ import SortSelect from './components/SortSelect';
 import SearchField from './components/SearchField';
 import TypeFilter from './components/TypeFilter';
 import ThemeToggle from './components/ThemeToggle';
+import PokemonModal from './components/PokemonModal';
 import usePokemon from './hooks/usePokemon';
 import styled from 'styled-components';
 
@@ -126,20 +128,12 @@ const ContentContainer = styled.div`
 const LoadingContainer = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center; 
+  justify-content: center;
   gap: 10px;
-  width: 100%; 
-  padding: 10px 0; 
+  width: 100%;
+  padding: 10px 0;
   background-color: ${({ theme }) => theme.background};
   z-index: 3;
-
-  @media (max-width: 768px) {
-    gap: 8px;
-  }
-
-  @media (max-width: 480px) {
-    gap: 6px;
-  }
 `;
 
 const LoadingText = styled.p`
@@ -147,14 +141,6 @@ const LoadingText = styled.p`
   color: #DC0A2D;
   margin: 0;
   font-family: 'Roboto', sans-serif;
-
-  @media (max-width: 768px) {
-    font-size: 14px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 12px;
-  }
 `;
 
 const LoadingSpinner = styled.div`
@@ -176,32 +162,6 @@ const ErrorMessage = styled.p`
   transform: translate(-50%, -50%);
   z-index: 3;
   font-family: 'Roboto', sans-serif;
-
-  @media (max-width: 768px) {
-    font-size: 16px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 14px;
-  }
-`;
-
-const ProgressBar = styled.div`
-  height: 3px;
-  width: 200px;
-  background-color: #DC0A2D;
-  border-radius: 5px;
-  animation: ${grow} 2s ease-in-out forwards;
-
-  @media (max-width: 768px) {
-    height: 8px;
-    width: 180px;
-  }
-
-  @media (max-width: 480px) {
-    height: 6px;
-    width: 150px;
-  }
 `;
 
 const ControlsWrapper = styled.div`
@@ -263,7 +223,7 @@ const BackToTopButton = styled.button`
   }
 `;
 
-function AppContent() {
+function PokemonListWithModal() {
   const {
     displayedPokemons,
     loadMorePokemons,
@@ -276,8 +236,24 @@ function AppContent() {
     typeFilter,
     loadedCount,
   } = usePokemon();
+  const navigate = useNavigate();
+  const { id } = useParams(); // Pega o ID da URL, se houver
+  const [selectedPokemon, setSelectedPokemon] = useState(null);
 
-  const { theme } = useTheme();
+  // Encontra o Pokémon correspondente ao ID da URL
+  React.useEffect(() => {
+    if (id) {
+      const pokemon = displayedPokemons.find(p => p.id === parseInt(id));
+      if (pokemon) {
+        setSelectedPokemon(pokemon);
+      } else {
+        // Se o Pokémon não estiver na lista exibida, poderia buscar diretamente, mas aqui mantemos simples
+        setSelectedPokemon(null);
+      }
+    } else {
+      setSelectedPokemon(null);
+    }
+  }, [id, displayedPokemons]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -286,48 +262,71 @@ function AppContent() {
     });
   };
 
-  
+  const handleCloseModal = () => {
+    setSelectedPokemon(null);
+    navigate('/'); // Volta para a lista sem ID na URL
+  };
+
+  return (
+    <>
+      {isLoading && loadedCount <= 800 && (
+        <LoadingContainer>
+          <LoadingSpinner />
+          <LoadingText>Loading...</LoadingText>
+        </LoadingContainer>
+      )}
+      <ControlsWrapper>
+        <SearchField onSearch={searchPokemon} />
+        <SortSelect sortOrder={sortOrder} onSort={sortPokemons} />
+        <TypeFilter onFilter={filterByType} currentFilter={typeFilter} />
+        <ThemeToggle themeToggleIcon="./src/assets/img/theme_toggle.png" />
+      </ControlsWrapper>
+      <main>
+        {error && displayedPokemons.length === 0 && (
+          <ErrorMessage>{error}</ErrorMessage>
+        )}
+        <PokemonList
+          pokemons={displayedPokemons}
+          loadMoreButton={
+            <ButtonContainer>
+              <LoadMoreButton onClick={loadMorePokemons} isLoading={isLoading} />
+              {loadedCount > 10 && (
+                <BackToTopButton onClick={scrollToTop}>
+                  Back to Top
+                </BackToTopButton>
+              )}
+            </ButtonContainer>
+          }
+        />
+      </main>
+      {selectedPokemon && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <PokemonModal pokemon={selectedPokemon} onClose={handleCloseModal} />
+        </Suspense>
+      )}
+    </>
+  );
+}
+
+function AppContent() {
+  const { theme } = useTheme();
 
   return (
     <StyledThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
       <GlobalStyle />
       <AppContainer>
-        <Header />
-        <DetailHeader src="./src/assets/img/detail_header.png" alt="header detail" />
-        <SideDetail src="./src/assets/img/side_detail.png" alt="side detail" />
-        <ContentContainer>
-          {isLoading && loadedCount <= 800 && (
-            <LoadingContainer>
-              <LoadingSpinner />
-              <LoadingText>Loading...</LoadingText>
-            </LoadingContainer>
-          )}
-          <ControlsWrapper>
-            <SearchField onSearch={searchPokemon} />
-            <SortSelect sortOrder={sortOrder} onSort={sortPokemons} />
-            <TypeFilter onFilter={filterByType} currentFilter={typeFilter} />
-            <ThemeToggle themeToggleIcon="./src/assets/img/theme_toggle.png" />
-          </ControlsWrapper>
-          <main>
-            {error && displayedPokemons.length === 0 && (
-              <ErrorMessage>{error}</ErrorMessage>
-            )}
-            <PokemonList
-              pokemons={displayedPokemons}
-              loadMoreButton={
-                <ButtonContainer>
-                  <LoadMoreButton onClick={loadMorePokemons} isLoading={isLoading} />
-                  {loadedCount > 10 && (
-                    <BackToTopButton onClick={scrollToTop}>
-                      Back to Top
-                    </BackToTopButton>
-                  )}
-                </ButtonContainer>
-              }
-            />
-          </main>
-        </ContentContainer>
-        <Footer />
+        <Router>
+          <Header />
+          <DetailHeader src="./src/assets/img/detail_header.png" alt="header detail" />
+          <SideDetail src="./src/assets/img/side_detail.png" alt="side detail" />
+          <ContentContainer>
+            <Routes>
+              <Route path="/" element={<PokemonListWithModal />} />
+              <Route path="/pokemon/:id" element={<PokemonListWithModal />} />
+            </Routes>
+          </ContentContainer>
+          <Footer />
+        </Router>
       </AppContainer>
     </StyledThemeProvider>
   );
