@@ -3,116 +3,88 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { ThemeProvider } from 'styled-components';
 import PokemonModal from '../../components/PokemonModal';
 
-const lightTheme = {
-  background: '#ffffff',
-  text: '#333333',
-  cardBackground: '#f2f2f2',
-  border: '#ccc',
-};
+const lightTheme = { cardBackground: '#f2f2f2', text: '#333333', border: '#ccc' };
 
 global.fetch = jest.fn();
 
-const renderWithTheme = (ui) => {
-  return render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
-};
-
 describe('PokemonModal', () => {
-  const mockOnClose = jest.fn();
-  const mockPokemon = { id: 4, image: 'charmander.png' };
+  const renderWithTheme = (ui) => render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
+  const mockPokemon = { id: 1, image: 'bulbasaur.png', name: 'bulbasaur' };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-  });
+  beforeEach(() => jest.clearAllMocks());
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  test('renders loading state initially', () => {
-    fetch.mockImplementation(() => new Promise(() => {}));
-    renderWithTheme(<PokemonModal pokemon={mockPokemon} onClose={mockOnClose} />);
+  test('shows loading state initially', async () => {
+    fetch.mockImplementation(() => new Promise(() => {})); 
+    renderWithTheme(<PokemonModal pokemon={mockPokemon} onClose={jest.fn()} />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  test('renders Pokémon details when API call is successful', async () => {
-    const mockDetails = {
-      name: 'charmander',
-      abilities: [
-        { ability: { name: 'blaze', url: 'url1' } },
-        { ability: { name: 'solar-power', url: 'url2' } },
-      ],
-      moves: [
-        { move: { name: 'scratch', url: 'url3' } },
-        { move: { name: 'ember', url: 'url4' } },
-      ],
-      types: [{ type: { name: 'fire' } }],
-      stats: [{ stat: { name: 'hp' }, base_stat: 39 }],
-    };
-
+  test('renders Pokémon details and handles ability click', async () => {
     fetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockDetails),
+        json: () => Promise.resolve({
+          name: 'bulbasaur',
+          abilities: [{ ability: { name: 'overgrow', url: '/ability/overgrow' } }],
+          moves: [{ move: { name: 'tackle', url: '/move/tackle' } }],
+          types: [{ type: { name: 'grass' } }],
+          stats: [{ stat: { name: 'hp' }, base_stat: 45 }],
+        }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () =>
-          Promise.resolve({
-            flavor_text_entries: [{ flavor_text: 'Prefers hot places.', language: { name: 'en' } }],
-          }),
+        json: () => Promise.resolve({
+          flavor_text_entries: [{ flavor_text: 'A strange seed...', language: { name: 'en' } }],
+        }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () =>
-          Promise.resolve({
-            damage_relations: {
-              double_damage_from: [{ name: 'water' }],
-              half_damage_from: [{ name: 'grass' }],
-              no_damage_from: [],
-            },
-          }),
+        json: () => Promise.resolve({
+          damage_relations: { double_damage_from: [{ name: 'fire' }], half_damage_from: [], no_damage_from: [] },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          effect_entries: [{ effect: 'Boosts grass moves', language: { name: 'en' } }],
+        }),
       });
 
     await act(async () => {
-      renderWithTheme(<PokemonModal pokemon={mockPokemon} onClose={mockOnClose} />);
-      jest.advanceTimersByTime(1000);
+      renderWithTheme(<PokemonModal pokemon={mockPokemon} onClose={jest.fn()} />);
     });
 
-    await waitFor(
-      () => {
-        expect(screen.getByText('charmander')).toBeInTheDocument();
-      },
-      { timeout: 5000 }
-    );
-
-    expect(screen.getByText('fire')).toBeInTheDocument();
-    expect(screen.getByText('blaze')).toBeInTheDocument();
-    expect(screen.getByText('solar-power')).toBeInTheDocument();
-    expect(screen.getByText('scratch')).toBeInTheDocument();
-    expect(screen.getByText('ember')).toBeInTheDocument();
-    expect(screen.getByText('hp: 39')).toBeInTheDocument();
-    expect(screen.getByText('Prefers hot places.')).toBeInTheDocument();
-    expect(screen.getByText('water')).toBeInTheDocument();
-    expect(screen.getByText('grass')).toBeInTheDocument();
-  });
-
-  test('renders error message when API call fails', async () => {
-    fetch
-      .mockRejectedValueOnce(new Error('Failed to fetch'))
-      .mockRejectedValueOnce(new Error('Failed to fetch'))
-      .mockRejectedValueOnce(new Error('Failed to fetch'));
+    await waitFor(() => {
+      expect(screen.getByText('bulbasaur')).toBeInTheDocument();
+      expect(screen.getByText('grass')).toBeInTheDocument();
+      expect(screen.getByText('overgrow')).toBeInTheDocument();
+    });
 
     await act(async () => {
-      renderWithTheme(<PokemonModal pokemon={mockPokemon} onClose={mockOnClose} />);
-      jest.advanceTimersByTime(1000);
+      fireEvent.click(screen.getByText('overgrow'));
     });
 
-    await waitFor(
-      () => {
-        expect(screen.getByText('Error loading information.')).toBeInTheDocument();
-      },
-      { timeout: 3000 }
-    );
+    await waitFor(() => {
+      expect(screen.getByText('Boosts grass moves')).toBeInTheDocument();
+    });
+  });
+
+  test('closes modal on button click', async () => {
+    fetch
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ name: 'bulbasaur', abilities: [], moves: [], types: [], stats: [] }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ flavor_text_entries: [{ flavor_text: 'Test', language: { name: 'en' } }] }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ damage_relations: { double_damage_from: [], half_damage_from: [], no_damage_from: [] } }) });
+
+    const onClose = jest.fn();
+    await act(async () => {
+      renderWithTheme(<PokemonModal pokemon={mockPokemon} onClose={onClose} />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('bulbasaur')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /×/i }));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

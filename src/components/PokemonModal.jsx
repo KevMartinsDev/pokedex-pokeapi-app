@@ -1,86 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-
-export const cleanText = (text) => {
-  return text.replace(/[\f\n\r\t\v]/g, ' ');
-};
-
-export async function fetchPokemonDetails(pokemonId) {
-  const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
-  if (!response.ok) throw new Error('Error loading Pokémon details');
-  const data = await response.json();
-  return {
-    name: data.name,
-    abilities: data.abilities.map((ability) => ({
-      name: ability.ability.name,
-      url: ability.ability.url,
-    })),
-    moves: data.moves.slice(0, 10).map((move) => ({
-      name: move.move.name,
-      url: move.move.url,
-    })),
-    types: data.types.map((type) => type.type.name),
-    stats: data.stats.map((stat) => ({
-      name: stat.stat.name,
-      value: stat.base_stat,
-    })),
-  };
-}
-
-export async function fetchPokemonDescription(pokemonId) {
-  const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`);
-  if (!response.ok) throw new Error('Error loading Pokémon description');
-  const data = await response.json();
-  const flavorText = data.flavor_text_entries.find((entry) => entry.language.name === 'en');
-  return flavorText ? cleanText(flavorText.flavor_text) : 'No description available.';
-}
-
-export async function fetchAbilityDescription(abilityUrl) {
-  const response = await fetch(abilityUrl);
-  if (!response.ok) throw new Error('Error loading ability description');
-  const data = await response.json();
-  const effectEntry = data.effect_entries.find((entry) => entry.language.name === 'en');
-  return effectEntry ? cleanText(effectEntry.effect) : 'No ability description available.';
-}
-
-export async function fetchMoveDescription(moveUrl) {
-  const response = await fetch(moveUrl);
-  if (!response.ok) throw new Error('Error loading move description');
-  const data = await response.json();
-  const effectEntry = data.effect_entries.find((entry) => entry.language.name === 'en');
-  return effectEntry ? cleanText(effectEntry.effect) : 'No move description available.';
-}
-
-export async function fetchTypeMatchups(types) {
-  const typeData = await Promise.all(
-    types.map(async (type) => {
-      const response = await fetch(`https://pokeapi.co/api/v2/type/${type}`);
-      if (!response.ok) throw new Error('Error loading type data');
-      return await response.json();
-    })
-  );
-
-  const weaknesses = new Set();
-  const resistances = new Set();
-
-  typeData.forEach((type) => {
-    type.damage_relations.double_damage_from.forEach((t) => weaknesses.add(t.name));
-    type.damage_relations.half_damage_from.forEach((t) => resistances.add(t.name));
-    type.damage_relations.no_damage_from.forEach((t) => resistances.add(t.name));
-  });
-
-  resistances.forEach((type) => {
-    if (weaknesses.has(type)) {
-      weaknesses.delete(type);
-      resistances.delete(type);
-    }
-  });
-
-  return {
-    weaknesses: Array.from(weaknesses),
-    resistances: Array.from(resistances),
-  };
-}
+import { fetchPokemonDetails, fetchPokemonDescription, fetchAbilityDescription, fetchMoveDescription, fetchTypeMatchups } from './PokemonModalUtils';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -100,6 +20,7 @@ const ModalContent = styled.div`
   color: ${({ theme }) => theme.text};
   padding: 20px;
   border-radius: 10px;
+  border: 3px solid #232323;
   width: 90%;
   max-width: 1000px;
   max-height: 85vh;
@@ -110,54 +31,55 @@ const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
-
-  @media (max-width: 1024px) {
-    max-width: 90%;
-    padding: 15px;
-  }
-
-  @media (max-width: 768px) {
-    max-width: 95%;
-    padding: 10px;
-    max-height: 90vh;
-  }
-
-  @media (max-width: 480px) {
-    width: 100%;
-    padding: 10px;
-    border-radius: 0;
-    max-height: 95vh;
-  }
+  font-family: 'Roboto', 'Arial', sans-serif;
 `;
 
 const CloseButton = styled.button`
   position: absolute;
   top: 10px;
   right: 10px;
-  background: none;
-  border: none;
-  font-size: 24px;
+  width: 30px;
+  height: 30px;
+  background-color: #DC0A2D;
+  color: white;
+  border: 2px solid #232323;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: bold;
   cursor: pointer;
-  color: ${({ theme }) => theme.text};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  font-family: 'Roboto', 'Arial', sans-serif;
+
+  &:hover {
+    background-color: #ff1a3d;
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.95) rotate(90deg);
+  }
 `;
 
 const HeaderSection = styled.div`
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
   justify-content: space-around;
   gap: 15px;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  border: 3px solid #232323;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: ${({ theme }) => theme.cardBackground};
 `;
 
 const ImageContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  gap: 5px;
 `;
 
 const PokemonImage = styled.img`
@@ -174,6 +96,7 @@ const PokemonName = styled.h2`
   margin: 0;
   font-size: 24px;
   text-transform: capitalize;
+  font-family: 'Roboto', 'Arial', sans-serif;
 
   @media (max-width: 480px) {
     font-size: 20px;
@@ -183,21 +106,24 @@ const PokemonName = styled.h2`
 const TypeTags = styled.div`
   display: flex;
   gap: 5px;
-  margin-top: 5px;
 `;
 
 const TypeTag = styled.span`
   padding: 3px 6px;
-  background-color: ${({ theme }) => theme.border};
+  background-color: ${({ type }) => typeColors[type] || '#777'};
+  color: white;
   border-radius: 3px;
   font-size: 12px;
+  text-transform: capitalize;
+  font-family: 'Roboto', sans-serif;
 `;
 
 const StatsPanel = styled.div`
-  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
+  border: 3px solid #232323;
+  border-radius: 8px;
   padding: 10px;
-  border-radius: 5px;
-  width: 150px;
+  width: 30%;
+  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
 
   @media (max-width: 768px) {
     width: 100%;
@@ -214,6 +140,7 @@ const StatTitle = styled.h4`
   margin: 0 0 5px 0;
   font-size: 14px;
   width: 100%;
+  font-family: 'Roboto', 'Arial', sans-serif;
 `;
 
 const StatTag = styled.span`
@@ -221,14 +148,17 @@ const StatTag = styled.span`
   background-color: ${({ theme }) => theme.border};
   border-radius: 3px;
   font-size: 12px;
+  text-transform: capitalize;
+  font-family: 'Roboto', 'Arial', sans-serif;
 `;
 
 const MatchupPanel = styled.div`
-  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
+  border: 3px solid #232323;
+  border-radius: 8px;
   padding: 10px;
-  border-radius: 5px;
   width: 100%;
-  max-width: 150px;
+  max-width: 30%;
+  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
 
   @media (max-width: 768px) {
     max-width: 100%;
@@ -242,6 +172,7 @@ const MatchupSection = styled.div`
 const MatchupTitle = styled.h4`
   margin: 0 0 5px 0;
   font-size: 14px;
+  font-family: 'Roboto', 'Arial', sans-serif;
 `;
 
 const TypeList = styled.div`
@@ -264,6 +195,10 @@ const ListsSection = styled.div`
 const AbilitiesPanel = styled.div`
   flex: 1;
   min-width: 200px;
+  border: 3px solid #232323;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
 
   @media (max-width: 480px) {
     min-width: 100%;
@@ -273,6 +208,10 @@ const AbilitiesPanel = styled.div`
 const MovesPanel = styled.div`
   flex: 1;
   min-width: 200px;
+  border: 3px solid #232323;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
 
   @media (max-width: 480px) {
     min-width: 100%;
@@ -297,19 +236,52 @@ const ListItem = styled.li`
   background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
   border-radius: 5px;
   cursor: pointer;
+  text-transform: capitalize;
+  font-family: 'Roboto', 'Arial', sans-serif;
+  font-size: 16px;
   &:hover {
     background-color: ${({ theme }) => theme.border};
   }
 `;
 
 const DescriptionPanel = styled.div`
-  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
+  border: 3px solid #232323;
+  border-radius: 8px;
   padding: 15px;
-  border-radius: 5px;
   width: 100%;
   box-sizing: border-box;
-  overflow-wrap: break-word;
+  background-color: ${({ theme }) => theme.cardBackground === '#f2f2f2' ? '#e0e0e0' : '#666666'};
 `;
+
+const DescriptionText = styled.p`
+  margin: 0;
+  font-family: 'Roboto', 'Arial', sans-serif;
+  font-size: 16px;
+  &::first-letter {
+    text-transform: uppercase;
+  }
+`;
+
+const typeColors = {
+  normal: '#A8A77A',
+  fire: '#EE8130',
+  water: '#6390F0',
+  electric: '#F7D02C',
+  grass: '#7AC74C',
+  ice: '#96D9D6',
+  fighting: '#C22E28',
+  poison: '#A33EA1',
+  ground: '#E2BF65',
+  flying: '#A98FF3',
+  psychic: '#F95587',
+  bug: '#A6B91A',
+  rock: '#B6A136',
+  ghost: '#735797',
+  dragon: '#6F35FC',
+  dark: '#705746',
+  steel: '#B7B7CE',
+  fairy: '#D685AD',
+};
 
 function PokemonModal({ pokemon, onClose }) {
   const [details, setDetails] = useState(null);
@@ -317,23 +289,38 @@ function PokemonModal({ pokemon, onClose }) {
   const [selectedAbility, setSelectedAbility] = useState(null);
   const [selectedMove, setSelectedMove] = useState(null);
   const [typeMatchups, setTypeMatchups] = useState({ weaknesses: [], resistances: [] });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const loadDetails = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
+        
         const pokemonDetails = await fetchPokemonDetails(pokemon.id);
+        if (!pokemonDetails) throw new Error('No details returned');
         const pokemonDesc = await fetchPokemonDescription(pokemon.id);
         const matchups = await fetchTypeMatchups(pokemonDetails.types);
+        
         setDetails(pokemonDetails);
         setDescription(pokemonDesc);
         setTypeMatchups(matchups);
       } catch (error) {
-        console.error('Erro no loadDetails:', error);
-        setDescription('Error loading information.');
+        console.error('Error loading details:', error.message);
+        setError(error.message);
+        return; 
+      } finally {
+        setIsLoading(false);
       }
     };
-    loadDetails();
-  }, [pokemon.id]);
+    if (pokemon && pokemon.id) {
+      loadDetails();
+    } else {
+      setError('Invalid Pokémon data provided.');
+      setIsLoading(false);
+    }
+  }, [pokemon]);
 
   const handleAbilityClick = async (ability) => {
     if (selectedAbility?.url === ability.url) {
@@ -345,9 +332,9 @@ function PokemonModal({ pokemon, onClose }) {
         const abilityDesc = await fetchAbilityDescription(ability.url);
         setSelectedAbility(ability);
         setSelectedMove(null);
-        setDescription(abilityDesc);
+        setDescription(abilityDesc || 'No description available.');
       } catch (error) {
-        console.error(error);
+        console.error(`Error fetching ability ${ability.name}:`, error.message);
         setDescription('Error loading ability description.');
       }
     }
@@ -375,28 +362,34 @@ function PokemonModal({ pokemon, onClose }) {
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose}>×</CloseButton>
-        {details && (
+        {isLoading && (
+          <DescriptionPanel>
+            <DescriptionText>Loading...</DescriptionText>
+          </DescriptionPanel>
+        )}
+        {error && !isLoading && (
+          <DescriptionPanel>
+            <DescriptionText>{error}</DescriptionText>
+          </DescriptionPanel>
+        )}
+        {details && !isLoading && !error && (
           <>
             <HeaderSection>
               <ImageContainer>
-                <PokemonImage src={pokemon.image} alt={details.name} />
-              </ImageContainer>
-              <div>
-                <PokemonName>{details.name}</PokemonName>
                 <TypeTags>
                   {details.types.map((type) => (
-                    <TypeTag key={type}>{type}</TypeTag>
+                    <TypeTag key={type} type={type}>{type}</TypeTag>
                   ))}
                 </TypeTags>
-              </div>
+                <PokemonImage src={pokemon.image} alt={details.name} />
+                <PokemonName>{details.name}</PokemonName>
+              </ImageContainer>
               <StatsPanel>
                 <StatSection>
                   <StatTitle>Base Stats</StatTitle>
-                  <StatSection>
-                    {details.stats.map((stat) => (
-                      <StatTag key={stat.name}>{`${stat.name}: ${stat.value}`}</StatTag>
-                    ))}
-                  </StatSection>
+                  {details.stats.map((stat) => (
+                    <StatTag key={stat.name}>{`${stat.name}: ${stat.value}`}</StatTag>
+                  ))}
                 </StatSection>
               </StatsPanel>
               <MatchupPanel>
@@ -405,10 +398,10 @@ function PokemonModal({ pokemon, onClose }) {
                   <TypeList>
                     {typeMatchups.weaknesses.length > 0 ? (
                       typeMatchups.weaknesses.map((type) => (
-                        <TypeTag key={type}>{type}</TypeTag>
+                        <TypeTag key={type} type={type}>{type}</TypeTag>
                       ))
                     ) : (
-                      <TypeTag>None</TypeTag>
+                      <TypeTag type="normal">None</TypeTag>
                     )}
                   </TypeList>
                 </MatchupSection>
@@ -417,10 +410,10 @@ function PokemonModal({ pokemon, onClose }) {
                   <TypeList>
                     {typeMatchups.resistances.length > 0 ? (
                       typeMatchups.resistances.map((type) => (
-                        <TypeTag key={type}>{type}</TypeTag>
+                        <TypeTag key={type} type={type}>{type}</TypeTag>
                       ))
                     ) : (
-                      <TypeTag>None</TypeTag>
+                      <TypeTag type="normal">None</TypeTag>
                     )}
                   </TypeList>
                 </MatchupSection>
@@ -460,18 +453,18 @@ function PokemonModal({ pokemon, onClose }) {
                 </List>
               </MovesPanel>
             </ListsSection>
+            <DescriptionPanel>
+              <h3>
+                {selectedAbility
+                  ? `${selectedAbility.name} Description`
+                  : selectedMove
+                  ? `${selectedMove.name} Description`
+                  : 'Pokémon Description'}
+              </h3>
+              <DescriptionText>{description || 'Loading...'}</DescriptionText>
+            </DescriptionPanel>
           </>
         )}
-        <DescriptionPanel>
-          <h3>
-            {selectedAbility
-              ? `${selectedAbility.name} Description`
-              : selectedMove
-              ? `${selectedMove.name} Description`
-              : 'Pokémon Description'}
-          </h3>
-          <p>{description || 'Loading...'}</p>
-        </DescriptionPanel>
       </ModalContent>
     </ModalOverlay>
   );

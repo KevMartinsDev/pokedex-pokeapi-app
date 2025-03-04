@@ -39,3 +39,4 @@ function SortSelect({ sortOrder, onSort }) {
 }
 
 export default SortSelect;
+

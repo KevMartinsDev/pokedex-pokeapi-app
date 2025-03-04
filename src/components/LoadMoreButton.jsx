@@ -5,9 +5,9 @@ const StyledButton = styled.button`
   padding: 10px;
   font-size: 16px;
   border: 3px solid #232323;
-  border-radius: 20px; 
-  width: 200px; 
-  background-color: ${({ theme }) => theme.cardBackground};
+  border-radius: 20px;
+  width: 200px;
+  background-color: ${({ theme }) => theme.cardBackground || '#ffffff'};
   color: ${({ theme }) => theme.text};
   cursor: pointer;
   outline: none;
@@ -37,10 +37,10 @@ const StyledButton = styled.button`
   }
 `;
 
-const LoadMoreButton = ({ onClick, isLoading, children }) => {
+const LoadMoreButton = ({ onClick, isLoading }) => {
   return (
     <StyledButton onClick={onClick} disabled={isLoading}>
-      {isLoading ? 'Loading...' : children}
+      {isLoading ? 'Loading...' : 'Load More'}
     </StyledButton>
   );
 };

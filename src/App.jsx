@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { ThemeProvider as StyledThemeProvider, createGlobalStyle, keyframes } from 'styled-components';
 import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
 import Header from './components/Header';
@@ -12,6 +12,11 @@ import ThemeToggle from './components/ThemeToggle';
 import usePokemon from './hooks/usePokemon';
 import styled from 'styled-components';
 
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
 const grow = keyframes`
   from {
     width: 0;
@@ -22,9 +27,10 @@ const grow = keyframes`
 `;
 
 const GlobalStyle = createGlobalStyle`
-  * {
+  :root, body, html {
     font-family: 'Roboto', sans-serif;
-    font-size: 16px;
+  }
+  * {
     box-sizing: border-box;
   }
 `;
@@ -68,10 +74,10 @@ const DetailHeader = styled.img`
 const SideDetail = styled.img`
   position: fixed;
   right: 0;
-  top: -5%; 
+  top: -5%;
   width: 50px;
-  height: 110%; 
-  object-fit: cover; 
+  height: 110%;
+  object-fit: cover;
   z-index: 1;
 
   @media (max-width: 768px) {
@@ -99,6 +105,9 @@ const ContentContainer = styled.div`
   transition: all 0.3s ease;
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 140px);
 
   @media (max-width: 768px) {
     padding: 15px;
@@ -117,17 +126,19 @@ const ContentContainer = styled.div`
 const LoadingContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center; 
   gap: 10px;
-  margin-bottom: 20px;
+  width: 100%; 
+  padding: 10px 0; 
+  background-color: ${({ theme }) => theme.background};
+  z-index: 3;
 
   @media (max-width: 768px) {
     gap: 8px;
-    margin-bottom: 15px;
   }
 
   @media (max-width: 480px) {
     gap: 6px;
-    margin-bottom: 10px;
   }
 `;
 
@@ -135,6 +146,7 @@ const LoadingText = styled.p`
   font-size: 16px;
   color: #DC0A2D;
   margin: 0;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 768px) {
     font-size: 14px;
@@ -142,6 +154,35 @@ const LoadingText = styled.p`
 
   @media (max-width: 480px) {
     font-size: 12px;
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  border: 4px solid ${({ theme }) => theme.border};
+  border-top: 4px solid #DC0A2D;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: ${spin} 1s linear infinite;
+`;
+
+const ErrorMessage = styled.p`
+  font-size: 18px;
+  color: red;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  font-family: 'Roboto', sans-serif;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 14px;
   }
 `;
 
@@ -201,6 +242,7 @@ const BackToTopButton = styled.button`
   cursor: pointer;
   outline: none;
   transition: background-color 0.3s ease;
+  font-family: 'Roboto', sans-serif;
 
   &:hover {
     background-color: ${({ theme }) => theme.border};
@@ -244,40 +286,45 @@ function AppContent() {
     });
   };
 
+  
+
   return (
     <StyledThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
       <GlobalStyle />
       <AppContainer>
         <Header />
-        <DetailHeader src="./src/assets/img/detail_header.png" alt="detail_header" />
-        <SideDetail src="./src/assets/img/side_detail.png" alt="side_detail" />
+        <DetailHeader src="./src/assets/img/detail_header.png" alt="header detail" />
+        <SideDetail src="./src/assets/img/side_detail.png" alt="side detail" />
         <ContentContainer>
+          {isLoading && loadedCount <= 800 && (
+            <LoadingContainer>
+              <LoadingSpinner />
+              <LoadingText>Loading...</LoadingText>
+            </LoadingContainer>
+          )}
           <ControlsWrapper>
             <SearchField onSearch={searchPokemon} />
             <SortSelect sortOrder={sortOrder} onSort={sortPokemons} />
             <TypeFilter onFilter={filterByType} currentFilter={typeFilter} />
-            <ThemeToggle />
+            <ThemeToggle themeToggleIcon="./src/assets/img/theme_toggle.png" />
           </ControlsWrapper>
           <main>
-            {isLoading && loadedCount <= 800 && (
-              <LoadingContainer>
-                <LoadingText>Loading</LoadingText>
-                <ProgressBar />
-              </LoadingContainer>
+            {error && displayedPokemons.length === 0 && (
+              <ErrorMessage>{error}</ErrorMessage>
             )}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <PokemonList pokemons={displayedPokemons} loadMoreButton={
-              <ButtonContainer>
-                <LoadMoreButton onClick={loadMorePokemons} isLoading={isLoading}>
-                  Load More
-                </LoadMoreButton>
-                {loadedCount > 10 && (
-                  <BackToTopButton onClick={scrollToTop}>
-                    Back to Top
-                  </BackToTopButton>
-                )}
-              </ButtonContainer>
-            } />
+            <PokemonList
+              pokemons={displayedPokemons}
+              loadMoreButton={
+                <ButtonContainer>
+                  <LoadMoreButton onClick={loadMorePokemons} isLoading={isLoading} />
+                  {loadedCount > 10 && (
+                    <BackToTopButton onClick={scrollToTop}>
+                      Back to Top
+                    </BackToTopButton>
+                  )}
+                </ButtonContainer>
+              }
+            />
           </main>
         </ContentContainer>
         <Footer />
@@ -289,7 +336,9 @@ function AppContent() {
 function App() {
   return (
     <CustomThemeProvider>
-      <AppContent />
+      <Suspense fallback={<div>Loading...</div>}>
+        <AppContent />
+      </Suspense>
     </CustomThemeProvider>
   );
 }

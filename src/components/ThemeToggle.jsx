@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTheme } from '../context/ThemeContext';
-import themeToggleIcon from '../assets/img/theme_toggle.png';
 
 const SwitchContainer = styled.label`
   position: relative;
@@ -44,7 +43,7 @@ const Slider = styled.span`
     left: 2px;
     bottom: 2px;
     background-color: white;
-    background-image: url(${themeToggleIcon}); 
+    background-image: url(${props => props.themeToggleIcon || '/src/assets/img/theme_toggle.png'});
     background-size: 30px 30px;
     background-repeat: no-repeat;
     background-position: left center;
@@ -53,7 +52,7 @@ const Slider = styled.span`
   }
 `;
 
-function ThemeToggle() {
+function ThemeToggle({ themeToggleIcon }) {
   const { theme, toggleTheme } = useTheme();
 
   return (

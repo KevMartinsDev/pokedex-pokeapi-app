@@ -11,6 +11,7 @@ const StyledSelect = styled.select`
   color: ${({ theme }) => theme.text};
   outline: none;
   cursor: pointer;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 768px) {
     padding: 8px;
@@ -29,9 +30,10 @@ const StyledSelect = styled.select`
 
 const TypeFilter = ({ onFilter, currentFilter }) => {
   const pokemonTypes = [
-    "normal", "fire", "water", "electric", "grass", "ice", "fighting", "poison",
-    "ground", "flying", "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel", "fairy",
-  ];
+    "bug", "dark", "dragon", "electric", "fairy", "fighting", "fire", "flying",
+    "ghost", "grass", "ground", "ice", "normal", "poison", "psychic", "rock",
+    "steel", "water",
+  ].sort();
 
   return (
     <StyledSelect value={currentFilter} onChange={(e) => onFilter(e.target.value)}>

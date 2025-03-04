@@ -1,33 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import styled from 'styled-components';
-import PokemonModal from './PokemonModal';
+const PokemonModal = React.lazy(() => import('./PokemonModal'));
 
 const Card = styled.li`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin: 10px;
-  border: 3px solid #232323;
-  border-radius: 8px;
-  padding: 25px 10px 10px 10px;
-  width: 100%;
-  max-width: 150px;
-  background-color: ${({ theme }) => theme.cardBackground};
-  color: ${({ theme }) => theme.text};
-  cursor: pointer;
-  position: relative;
+  &.pokemon-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 10px;
+    border: 3px solid #232323;
+    border-radius: 8px;
+    padding: 25px 10px 10px 10px;
+    width: 100%;
+    max-width: 150px;
+    background-color: ${({ theme }) => theme.cardBackground};
+    color: ${({ theme }) => theme.text};
+    cursor: pointer;
+    position: relative;
+    font-family: 'Roboto', sans-serif;
 
-  @media (max-width: 768px) {
-    padding: 22px 8px 8px 8px;
-    border-width: 2px;
-  }
+    @media (max-width: 768px) {
+      padding: 22px 8px 8px 8px;
+      border-width: 2px;
+    }
 
-  @media (max-width: 480px) {
-    max-width: 100%;
-    margin: 5px 0;
-    padding: 20px 5px 5px 5px;
-    border-width: 2px;
+    @media (max-width: 480px) {
+      max-width: 100%;
+      margin: 5px 0;
+      padding: 20px 5px 5px 5px;
+      border-width: 2px;
+    }
   }
 `;
 
@@ -38,7 +41,7 @@ const ContainerType = styled.div`
   flex-wrap: wrap;
 `;
 
-const NumberCapsule = styled.span`
+const NumberCapsule = styled.span.attrs({ translate: 'no' })`
   position: absolute;
   top: -15px;
   left: 50%;
@@ -51,6 +54,7 @@ const NumberCapsule = styled.span`
   font-weight: bold;
   color: ${({ theme }) => theme.text};
   z-index: 1;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 768px) {
     top: -13px;
@@ -86,6 +90,8 @@ const Name = styled.p`
   font-size: 16px;
   font-weight: 500;
   margin-top: 10px;
+  text-transform: capitalize;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 480px) {
     font-size: 14px;
@@ -99,6 +105,8 @@ const Type = styled.span`
   font-size: 12px;
   color: white;
   background-color: ${({ type }) => typeColors[type] || '#777'};
+  text-transform: capitalize;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 480px) {
     padding: 3px;
@@ -128,49 +136,69 @@ const typeColors = {
 };
 
 function PokemonCard({ pokemon }) {
-  const [imageSrc, setImageSrc] = useState(pokemon.image);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const fallbackImages = [
+  const initialFallbacks = [
     pokemon.sprites?.front_default,
     pokemon.sprites?.back_default,
     pokemon.sprites?.front_shiny,
     pokemon.sprites?.back_shiny,
     'https://via.placeholder.com/120?text=No+Image',
-  ];
+  ].filter(Boolean);
+
+  const [imageSrc, setImageSrc] = useState(pokemon.image);
+  const [remainingFallbacks, setRemainingFallbacks] = useState(initialFallbacks);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleImageError = () => {
-    const nextImage = fallbackImages.shift();
-    if (nextImage) {
+    if (remainingFallbacks.length > 0) {
+      const nextImage = remainingFallbacks[0];
       setImageSrc(nextImage);
+      setRemainingFallbacks((prev) => prev.slice(1));
     }
   };
 
   const handleCardClick = () => {
-    setIsModalOpen(true);
+    if (pokemon.id >= 1 && pokemon.id <= 1025) {
+      setIsModalOpen(true);
+    } else {
+      console.error(`Invalid Pokémon ID: ${pokemon.id}. Modal not opened.`);
+    }
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
+  if (!pokemon || !pokemon.id || !pokemon.name || !pokemon.image) {
+    console.error('Insufficient data for Pokémon:', pokemon);
+    return null;
+  }
+
   return (
     <>
-      <Card onClick={handleCardClick}>
+      <Card
+        className="pokemon-card"
+        role="button" 
+        onClick={handleCardClick}
+        aria-label={`View details of ${pokemon.name}`}
+      >
         <NumberCapsule>#{pokemon.id}</NumberCapsule>
+        <ContainerType>
+          {pokemon.types && pokemon.types.map((type) => (
+            <Type key={type} type={type}>{type}</Type>
+          ))}
+        </ContainerType>
         <Image
           src={imageSrc}
           alt={pokemon.name}
           onError={handleImageError}
         />
         <Name>{pokemon.name}</Name>
-        <ContainerType>
-          {pokemon.types && pokemon.types.map((type) => (
-            <Type key={type} type={type}>{type}</Type>
-          ))}
-        </ContainerType>
       </Card>
-      {isModalOpen && <PokemonModal pokemon={pokemon} onClose={handleCloseModal} />}
+      {isModalOpen && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <PokemonModal pokemon={pokemon} onClose={handleCloseModal} />
+        </Suspense>
+      )}
     </>
   );
 }

@@ -1,4 +1,5 @@
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 
 const HeaderStyle = styled.header`
   display: flex;
@@ -11,16 +12,16 @@ const HeaderStyle = styled.header`
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  min-height: 150px; 
+  min-height: 150px;
 
   @media (max-width: 768px) {
     padding: 15px;
-    min-height: 120px; 
+    min-height: 120px;
   }
 
   @media (max-width: 480px) {
     padding: 10px;
-    min-height: 100px; 
+    min-height: 100px;
   }
 `;
 
