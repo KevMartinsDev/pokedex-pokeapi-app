@@ -91,9 +91,9 @@ const Logo = styled.img`
 function Header() {
   return (
     <HeaderStyle>
-      <Light1Style src="./src/assets/img/light_1.png" alt="detail_pokedex" />
-      <Light3Style src="./src/assets/img/light_3.png" alt="detail_pokedex" />
-      <Logo src="./src/assets/img/logo.png" alt="logo" />
+      <Light1Style src="./src/assets/img/light_1.png" alt="Pokédex detail" />
+      <Light3Style src="./src/assets/img/light_3.png" alt="Pokédex detail" />
+      <Logo src="./src/assets/img/logo.png" alt="Pokédex logo" />
     </HeaderStyle>
   );
 }

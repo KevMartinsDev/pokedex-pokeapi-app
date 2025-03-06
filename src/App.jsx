@@ -1,5 +1,5 @@
 import React, { Suspense, useState } from 'react';
-import { HashRouter as Router, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes, useNavigate, useParams, useLocation, Link } from 'react-router-dom';
 import { ThemeProvider as StyledThemeProvider, createGlobalStyle, keyframes } from 'styled-components';
 import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
 import Header from './components/Header';
@@ -11,6 +11,7 @@ import SearchField from './components/SearchField';
 import TypeFilter from './components/TypeFilter';
 import ThemeToggle from './components/ThemeToggle';
 import PokemonModal from './components/PokemonModal';
+import WhosThatPokemon from './components/WhosThatPokemon';
 import usePokemon from './hooks/usePokemon';
 import styled from 'styled-components';
 import themeToggleIcon from './assets/img/theme_toggle.png';
@@ -224,6 +225,40 @@ const BackToTopButton = styled.button`
   }
 `;
 
+const GameButton = styled(Link)`
+  padding: 8px;
+  font-size: 14px;
+  border: 3px solid #232323;
+  border-radius: 20px;
+  width: 150px;
+  background-color: ${({ theme }) => theme.cardBackground};
+  color: ${({ theme }) => theme.text};
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s ease;
+  font-family: 'Roboto', sans-serif;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.border};
+  }
+
+  @media (max-width: 768px) {
+    padding: 6px;
+    font-size: 12px;
+    border-width: 2px;
+    width: 130px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 5px;
+    font-size: 10px;
+    border-width: 2px;
+    width: 110px;
+  }
+`;
+
 function PokemonListWithModal() {
   const {
     displayedPokemons,
@@ -239,6 +274,7 @@ function PokemonListWithModal() {
   } = usePokemon();
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
   const [selectedPokemon, setSelectedPokemon] = useState(null);
 
   React.useEffect(() => {
@@ -266,6 +302,10 @@ function PokemonListWithModal() {
     navigate('/');
   };
 
+  const isGameRoute = location.pathname === '/whos-that-pokemon';
+  const gameButtonText = isGameRoute ? 'Return to Pokédex' : 'Who’s That Pokémon?';
+  const gameButtonTo = isGameRoute ? '/' : '/whos-that-pokemon';
+
   return (
     <>
       {isLoading && loadedCount <= 800 && (
@@ -279,6 +319,7 @@ function PokemonListWithModal() {
         <SortSelect sortOrder={sortOrder} onSort={sortPokemons} />
         <TypeFilter onFilter={filterByType} currentFilter={typeFilter} />
         <ThemeToggle themeToggleIcon={themeToggleIcon} />
+        <GameButton to={gameButtonTo}>{gameButtonText}</GameButton>
       </ControlsWrapper>
       <main>
         {error && displayedPokemons.length === 0 && (
@@ -322,6 +363,7 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<PokemonListWithModal />} />
               <Route path="/pokemon/:id" element={<PokemonListWithModal />} />
+              <Route path="/whos-that-pokemon" element={<WhosThatPokemon />} />
             </Routes>
           </ContentContainer>
           <Footer />

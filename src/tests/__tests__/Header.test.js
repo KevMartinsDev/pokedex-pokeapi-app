@@ -5,9 +5,9 @@ import Header from '../../components/Header';
 describe('Header', () => {
   test('renders all images with correct alt texts', () => {
     render(<Header />);
-    const detailImages = screen.getAllByAltText('detail_pokedex');
+    const detailImages = screen.getAllByAltText('Pokédex detail'); 
     expect(detailImages).toHaveLength(2); 
-    expect(screen.getByAltText('logo')).toBeInTheDocument(); 
+    expect(screen.getByAltText('Pokédex logo')).toBeInTheDocument(); 
   });
 
   test('applies correct styles to header container', () => {
