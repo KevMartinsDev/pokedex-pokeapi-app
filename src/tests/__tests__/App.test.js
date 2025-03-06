@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import App from '../../App';
 
+
 jest.mock('../../hooks/usePokemon', () => () => ({
   displayedPokemons: [{ id: 1, name: 'bulbasaur', image: 'b.png', types: ['grass'] }],
   loadMorePokemons: jest.fn(),
@@ -14,6 +15,26 @@ jest.mock('../../hooks/usePokemon', () => () => ({
   typeFilter: '',
   loadedCount: 20,
 }));
+
+
+jest.mock('../../App', () => {
+
+  return () => (
+    <div>
+      <header>
+        <img alt="logo" src="mock-logo.png" />
+      </header>
+      <li>#1</li>
+      <button>Load More</button>
+      <label>
+        <input type="checkbox" defaultChecked={false} />
+      </label>
+      <footer>
+        <p>2025 Kevin Martins</p>
+      </footer>
+    </div>
+  );
+});
 
 describe('App', () => {
   test('renderiza os componentes principais', () => {

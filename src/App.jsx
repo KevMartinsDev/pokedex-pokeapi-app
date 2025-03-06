@@ -13,6 +13,7 @@ import ThemeToggle from './components/ThemeToggle';
 import PokemonModal from './components/PokemonModal';
 import usePokemon from './hooks/usePokemon';
 import styled from 'styled-components';
+import themeToggleIcon from './assets/img/theme_toggle.png';
 
 const spin = keyframes`
   0% { transform: rotate(0deg); }
@@ -237,17 +238,15 @@ function PokemonListWithModal() {
     loadedCount,
   } = usePokemon();
   const navigate = useNavigate();
-  const { id } = useParams(); // Pega o ID da URL, se houver
+  const { id } = useParams();
   const [selectedPokemon, setSelectedPokemon] = useState(null);
 
-  // Encontra o Pokémon correspondente ao ID da URL
   React.useEffect(() => {
     if (id) {
       const pokemon = displayedPokemons.find(p => p.id === parseInt(id));
       if (pokemon) {
         setSelectedPokemon(pokemon);
       } else {
-        // Se o Pokémon não estiver na lista exibida, poderia buscar diretamente, mas aqui mantemos simples
         setSelectedPokemon(null);
       }
     } else {
@@ -264,7 +263,7 @@ function PokemonListWithModal() {
 
   const handleCloseModal = () => {
     setSelectedPokemon(null);
-    navigate('/'); // Volta para a lista sem ID na URL
+    navigate('/');
   };
 
   return (
@@ -279,7 +278,7 @@ function PokemonListWithModal() {
         <SearchField onSearch={searchPokemon} />
         <SortSelect sortOrder={sortOrder} onSort={sortPokemons} />
         <TypeFilter onFilter={filterByType} currentFilter={typeFilter} />
-        <ThemeToggle themeToggleIcon="./src/assets/img/theme_toggle.png" />
+        <ThemeToggle themeToggleIcon={themeToggleIcon} />
       </ControlsWrapper>
       <main>
         {error && displayedPokemons.length === 0 && (

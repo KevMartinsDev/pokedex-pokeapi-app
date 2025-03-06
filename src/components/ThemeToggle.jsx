@@ -62,7 +62,7 @@ function ThemeToggle({ themeToggleIcon }) {
         checked={theme === 'dark'}
         onChange={toggleTheme}
       />
-      <Slider className="slider" />
+      <Slider className="slider" themeToggleIcon={themeToggleIcon} />
     </SwitchContainer>
   );
 }
