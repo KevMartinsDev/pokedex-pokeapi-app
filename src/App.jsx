@@ -15,6 +15,8 @@ import WhosThatPokemon from './components/WhosThatPokemon';
 import usePokemon from './hooks/usePokemon';
 import styled from 'styled-components';
 import themeToggleIcon from './assets/img/theme_toggle.png';
+import detailHeader from './assets/img/detail_header.png'; 
+import sideDetail from './assets/img/side_detail.png';
 
 const spin = keyframes`
   0% { transform: rotate(0deg); }
@@ -357,8 +359,8 @@ function AppContent() {
       <AppContainer>
         <Router>
           <Header />
-          <DetailHeader src="./src/assets/img/detail_header.png" alt="header detail" />
-          <SideDetail src="./src/assets/img/side_detail.png" alt="side detail" />
+          <DetailHeader src={detailHeader} alt="header detail" />
+          <SideDetail src={sideDetail} alt="side detail" />
           <ContentContainer>
             <Routes>
               <Route path="/" element={<PokemonListWithModal />} />
