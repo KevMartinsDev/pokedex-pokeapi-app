@@ -64,6 +64,10 @@ Essas ferramentas foram escolhidas por sua robustez, comunidade ativa e adequaç
    - Escolhido para compatibilidade com GitHub Pages sem configuração de servidor adicional.
    - Justificativa: Simplifica o deploy em ambientes estáticos.
 
+## Demonstração
+
+Você pode visualizar a demonstração deste projeto através do seguinte link clicando <a href="https://kevmartinsdev.github.io/pokedex-pokeapi-app/#/">"aqui"</a>
+
 ## Passo a Passo para Rodar o Projeto
 
 ### Pré-requisitos
