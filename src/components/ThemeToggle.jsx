@@ -24,7 +24,9 @@ const SwitchInput = styled.input`
   }
 `;
 
-const Slider = styled.span`
+const Slider = styled.span.withConfig({
+  shouldForwardProp: (prop) => prop !== 'themeToggleIcon',
+})`
   position: absolute;
   cursor: pointer;
   top: 0;
