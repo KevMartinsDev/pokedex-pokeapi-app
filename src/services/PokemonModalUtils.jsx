@@ -4,7 +4,7 @@ import {
     fetchAbilityDescriptionData,
     fetchMoveDescriptionData,
     fetchTypeMatchupsData,
-  } from '../services/pokemonService';
+  } from './pokemonService';
   
   export const fetchPokemonDetails = async (pokemonId) => {
     if (!Number.isInteger(pokemonId) || pokemonId < 1 || pokemonId > 1025) {

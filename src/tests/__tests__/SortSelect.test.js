@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import SortSelect from '../../components/SortSelect';
+import SortSelect from '../../components/sortSelect/SortSelect';
 
 describe('SortSelect', () => {
   test('renders options and triggers onSort', () => {

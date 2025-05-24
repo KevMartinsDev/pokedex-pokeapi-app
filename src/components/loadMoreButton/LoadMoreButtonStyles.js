@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import styled from "styled-components";
+
 
 const StyledButton = styled.button`
   padding: 10px;
@@ -37,12 +37,4 @@ const StyledButton = styled.button`
   }
 `;
 
-const LoadMoreButton = ({ onClick, isLoading }) => {
-  return (
-    <StyledButton onClick={onClick} disabled={isLoading}>
-      {isLoading ? 'Loading...' : 'Load More'}
-    </StyledButton>
-  );
-};
-
-export default LoadMoreButton;
+export {StyledButton};

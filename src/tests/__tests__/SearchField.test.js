@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import SearchField from '../../components/SearchField';
+import SearchField from '../../components/searchField/SearchField';
 
 jest.mock('lodash/debounce', () => jest.fn((fn) => fn));
 

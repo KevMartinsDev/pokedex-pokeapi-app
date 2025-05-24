@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
-import LoadMoreButton from '../../components/LoadMoreButton';
+import LoadMoreButton from '../../components/loadMoreButton/LoadMoreButton';
 
 const lightTheme = {
   cardBackground: '#f2f2f2', 

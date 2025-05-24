@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ThemeToggle from '../../components/ThemeToggle';
+import ThemeToggle from '../../components/themeToggle/ThemeToggle';
 import { ThemeProvider } from '../../context/ThemeContext';
 
 describe('ThemeToggle', () => {

@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
-import usePokemon from '../../hooks/usePokemon';
+import usePokemon from '../../services/usePokemon';
 
 describe('usePokemon', () => {
   beforeEach(() => {

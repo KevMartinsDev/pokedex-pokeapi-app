@@ -1,10 +1,10 @@
 import { Suspense, } from 'react';
 import { HashRouter as Router,} from 'react-router-dom';
-import AppRoutes from './routes/AppRoutes';
+import AppRoutes from './router/AppRoutes';
 import { ThemeProvider as StyledThemeProvider, createGlobalStyle } from 'styled-components';
 import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import Header from './components/header/Header';
+import Footer from './components/footer/Footer';
 import styled from 'styled-components';
 import detailHeader from './assets/img/detail_header.png'; 
 import sideDetail from './assets/img/side_detail.png';

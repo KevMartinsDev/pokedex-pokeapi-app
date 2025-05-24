@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import TypeFilter from '../../components/TypeFilter';
+import TypeFilter from '../../components/typeFilter/TypeFilter';
 
 describe('TypeFilter', () => {
   test('renders type options and triggers onFilter', () => {

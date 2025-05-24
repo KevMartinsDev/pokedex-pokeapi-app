@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
-import PokemonModal from '../../components/PokemonModal';
+import PokemonModal from '../../components/PokemonModal/PokemonModal';
 
 const lightTheme = { cardBackground: '#f2f2f2', text: '#333333', border: '#ccc' };
 

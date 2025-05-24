@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchPokemonList, fetchPokemonByName } from '../services/pokemonService';
+import { fetchPokemonList, fetchPokemonByName } from './pokemonService';
 
 async function fetchPokemonDetails(pokemon) {
   const response = await fetch(pokemon.url);

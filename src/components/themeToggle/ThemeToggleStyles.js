@@ -1,6 +1,5 @@
-import React from 'react';
 import styled from 'styled-components';
-import { useTheme } from '../context/ThemeContext';
+
 
 const SwitchContainer = styled.label`
   position: relative;
@@ -54,19 +53,4 @@ const Slider = styled.span.withConfig({
   }
 `;
 
-function ThemeToggle({ themeToggleIcon }) {
-  const { theme, toggleTheme } = useTheme();
-
-  return (
-    <SwitchContainer>
-      <SwitchInput
-        type="checkbox"
-        checked={theme === 'dark'}
-        onChange={toggleTheme}
-      />
-      <Slider className="slider" themeToggleIcon={themeToggleIcon} />
-    </SwitchContainer>
-  );
-}
-
-export default ThemeToggle;
+export { SwitchContainer, SwitchInput, Slider };

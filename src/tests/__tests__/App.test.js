@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import App from '../../App';
 
 
-jest.mock('../../hooks/usePokemon', () => () => ({
+jest.mock('../../services/usePokemon', () => () => ({
   displayedPokemons: [{ id: 1, name: 'bulbasaur', image: 'b.png', types: ['grass'] }],
   loadMorePokemons: jest.fn(),
   isLoading: false,

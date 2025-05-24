@@ -1,6 +1,4 @@
-import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import debounce from 'lodash/debounce';
 
 const SearchInput = styled.input`
   padding: 10px;
@@ -32,23 +30,4 @@ const SearchInput = styled.input`
   }
 `;
 
-function SearchField({ onSearch }) {
-  const debouncedSearch = useCallback(
-    debounce((value) => onSearch(value), 300),
-    [onSearch]
-  );
-
-  const handleInputChange = (e) => {
-    debouncedSearch(e.target.value);
-  };
-
-  return (
-    <SearchInput
-      type="text"
-      placeholder="Search Pokémon..."
-      onChange={handleInputChange}
-    />
-  );
-}
-
-export default SearchField;
+export { SearchInput };

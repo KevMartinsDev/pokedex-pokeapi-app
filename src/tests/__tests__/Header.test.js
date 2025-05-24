@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Header from '../../components/Header';
+import Header from '../../components/header/Header';
 
-jest.mock('../../components/Header', () => () => (
+jest.mock('../../components/header/Header', () => () => (
   <header style={{ backgroundColor: '#DC0A2D', padding: '20px', maxWidth: '1200px' }}>
     <img alt="Pokédex detail" src="mocked-light1" />
     <img alt="Pokédex detail" src="mocked-light3" />

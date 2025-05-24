@@ -1,8 +1,8 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-import PokemonListWithModal from "../components/PokemonListWithModal";
-import WhosThatPokemon from "../components/WhosThatPokemon";
+import PokemonListWithModal from "../components/PokemonListWithModal/PokemonListWithModal";
+import WhosThatPokemon from "../components/whosThatPokemon/WhosThatPokemon";
 
 const AppRoutes = () => {
   return (

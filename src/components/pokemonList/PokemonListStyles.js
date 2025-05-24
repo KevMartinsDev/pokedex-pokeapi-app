@@ -1,5 +1,3 @@
-import React from 'react';
-import PokemonCard from "./PokemonCard";
 import styled from 'styled-components';
 
 const Ulstyle = styled.ul`
@@ -26,17 +24,4 @@ const Ulstyle = styled.ul`
   }
 `;
 
-function PokemonList({ pokemons, loadMoreButton }) {
-  return (
-    <div>
-      <Ulstyle>
-        {pokemons.map((pokemon) => (
-          <PokemonCard key={pokemon.name} pokemon={pokemon} />
-        ))}
-      </Ulstyle>
-      {loadMoreButton}
-    </div>
-  );
-}
-
-export default PokemonList;
+export {Ulstyle};

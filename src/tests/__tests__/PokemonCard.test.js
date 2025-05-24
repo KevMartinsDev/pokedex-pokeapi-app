@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import PokemonCard from '../../components/PokemonCard';
+import PokemonCard from '../../components/PokemonCard/PokemonCard';
 
-jest.mock('../../components/PokemonModal', () => ({ pokemon, onClose }) => (
+jest.mock('../../components/PokemonModal/PokemonModal', () => ({ pokemon, onClose }) => (
   <div data-testid="modal">Modal for {pokemon.name} <button onClick={onClose}>Close</button></div>
 ));
 
